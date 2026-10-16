@@ -1,0 +1,170 @@
+@import "https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700";
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+body {
+    font-family: 'Poppins', sans-serif;
+    /* font-family: "Source Sans Pro", "Arial", sans-serif; */
+    line-height:15px;
+    overflow-x: hidden;
+    /* background-color: #FFFFFF; */
+    background-color: #EEEEEE
+}
+.navbar-default {
+    /* min-height: 800px !important; */
+    padding: 40px 0px;
+    height: auto;
+    background-color: #EEEEEE;
+    z-index: 10000;
+    /* overflow-y: scroll; */
+    
+}
+ #wrapper {
+    width: 100%;
+    margin-top:15px;
+    position: relative;
+    height: 100%;;
+}
+
+#page-wrapper {
+    padding: 0px 15px;
+    /* background-color: #FFFFFF; */
+}
+#page-inner {
+    width:100%;
+    margin:55px 20px 10px 0px;
+    background-color:#FFFFFF !important;
+    padding:10px 20px;
+    min-height: 650px;
+}
+.pad-top {
+    padding-top:15px;
+}
+/*==============================================
+    MENU STYLES    
+    =============================================*/
+.sidebar-collapse .nav {
+	padding:0;
+    padding-top:30px;
+}
+
+.sidebar-collapse > .nav > li > a {
+	padding:15px 10px;
+    color: #303841;
+    font-weight: 900;
+    font-size: 16px;
+}
+.sidebar-collapse > .nav > li {
+	border-bottom:1px solid #e1e1e1;
+}
+.sidebar-collapse .nav > li > a:hover,
+.sidebar-collapse .nav > li > a:focus {
+	
+	background:#F3F3F3;
+	outline:0;
+}
+
+.navbar {
+    padding: 10px;
+}
+.navbar-side {
+	border:none;
+}
+.navbar-inverse {
+    background-color: #3A4750;
+    border-color: #F0F0F0;
+    border-bottom: 4px solid #00ADB5;
+    position: fixed;
+}
+
+
+.nav > li > a > i {
+    margin-right:10px;
+}
+.logout-spn {
+    float:right;
+    color:#fff;
+    font-size:19px;
+    font-weight:800;
+    margin:20px;
+    margin: 18px 25px 10px 50px;
+}
+.logout-spn a {
+    text-decoration:none;
+    color: #d1ab66;
+}
+.logout-spn a:hover {
+    color: #FFF;
+}
+.active-link {
+    background-color:#f3f3f3;
+}
+    
+/*==============================================
+    DASHBOARD STYLES    
+    =============================================*/
+.div-square {
+    padding:5px;
+    border:3px dotted;
+    -webkit-border-radius:8px;
+   -moz-border-radius:8px;
+    border-radius:8px;
+    margin:5px;
+    color: #FFF;
+
+}
+
+.div-square> a,.div-square> a:hover {
+    color:#808080;
+     text-decoration:none;
+}
+.footer > a, .footer>a:hover {
+    
+    color:#fff;
+}
+
+ @media(min-width:768px) {
+     #page-wrapper{
+               margin: 0 0 0 260px;
+        padding: 15px 30px;
+        min-height: 512px;
+		
+    }
+	
+	
+    .navbar-side {
+        z-index: 1;
+        position: absolute;
+        width: 260px;
+       
+    }
+
+ 
+}
+.footer {
+    bottom: 0px;
+    margin: 0px;
+    padding: 10px 0px 0px 0px;
+    font-size: 10px;
+    text-align: center;
+    font-weight: lighter;
+}
+.row h3 {
+    font-weight: bold;
+}
+
+.tab-content h4 {
+    padding: 0px 0px 10px 0px;
+    font-weight: bold;
+    margin: 5px 0px;
+    line-height: 10px;
+}
+
+.th-transaksi {
+    text-align: right;
+}
+.th-transaksi-bar {
+    height: 30px;
+}

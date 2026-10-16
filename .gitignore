@@ -1,0 +1,43 @@
+# Operating System Files
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Editor & IDE files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Agentic / AI scratch & logs
+.agents/
+.gemini/
+
+# Database dumps and SQL files
+*.sql
+database/*.sql
+database/
+
+# Configuration files with credentials / local settings
+app/config/Database.php
+app/config/store_config.json
+app/config/landing_config.json
+
+# Temporary / Log files
+*.log
+error_log
+*.backup*
+scratch/
+tmp/

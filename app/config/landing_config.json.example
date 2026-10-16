@@ -1,0 +1,30 @@
+{
+    "title": "Fashion Store",
+    "tagline": "Fashion, Apparel & Shoes Collection",
+    "bio": "Pusat pakaian, celana, kaos, aksesoris & aneka produk fashion berkualitas.",
+    "location": "Solo, Jawa Tengah",
+    "opening_hours": "Buka Setiap Hari: 09.00 - 21.00 WIB",
+    "instagram": "fashionstore",
+    "tiktok": "fashionstore",
+    "whatsapp_utama": "0812-3456-7890",
+    "links": [
+        {
+            "id": "link_1",
+            "title": "Chat WhatsApp / Order Online",
+            "subtitle": "Konsultasi stok & order langsung ke admin",
+            "url": "https://wa.me/6281234567890?text=Halo%20Admin,%20saya%20ingin%20tanya%20produk",
+            "icon": "fa-brands fa-whatsapp",
+            "color": "emerald",
+            "active": true
+        },
+        {
+            "id": "link_2",
+            "title": "Official Shopee Store",
+            "subtitle": "Katalog lengkap, promo diskon & gratis ongkir",
+            "url": "https://shopee.co.id",
+            "icon": "fa-solid fa-bag-shopping",
+            "color": "orange",
+            "active": true
+        }
+    ]
+}
