@@ -7,14 +7,14 @@ A modern, fast, responsive web-based Point of Sale (POS) and inventory managemen
 ## 🌟 Fitur Utama (Key Features)
 
 ### 1. ⚡ Layar Kasir Point of Sales (POS) Touch-Friendly
-- **Katalog Produk Cepat**: Navigasi kategori interaktif, pencarian langsung (instant search), dan kartu produk yang responsif.
+- **Katalog Produk Cepat**: Navigasi kategori interaktif, pencarian langsung (*instant search*), dan kartu produk yang responsif.
 - **Pemilihan Ukuran Dinamis**: Modal pemilihan varian ukuran/size produk dengan indikator ketersediaan stok realtime.
 - **Penyederhanaan Metode Pembayaran**:
   - 💵 **Tunai (Cash)**
   - 📱 **Non Tunai (QRIS / Transfer)**
 - **Pilihan Uang Cepat (Tap) Pintar**:
   - Tombol pecahan uang otomatis menyesuaikan nilai yang mendekati total belanja (*Uang Pas*, pembulatan kelipatan terdekat, dll.).
-  - Semua nominal uang terformat rapi dengan tanda titik (`.`), misal: `50.000`, `100.000`, `150.000`.
+  - Semua nominal uang terformat rapi dengan pemisah ribuan titik (`.`), misal: `50.000`, `100.000`, `150.000`.
 - **Cetak Struk Kasir Termal**:
   - Mendukung printer thermal ukuran **58mm** dan **80mm**.
   - Header & footer toko yang dapat dikonfigurasi secara dinamis.
@@ -26,14 +26,14 @@ A modern, fast, responsive web-based Point of Sale (POS) and inventory managemen
 - **Paging / Pagination di Semua Master Data**:
   - Tersedia di: **Data Produk**, **Kategori**, **Ukuran/Size**, **Pelanggan**, **Supplier**, **Riwayat Stok Masuk**, **Riwayat Stok Keluar**, dan **Pengguna Sistem**.
   - Pilihan jumlah baris per halaman: `10`, `25`, `50`, `100`, atau `Semua`.
-  - Terintegrasi otomatis dengan kotak pencarian dan filter kategori tanpa perlu reload halaman.
+  - Terintegrasi otomatis dengan kotak pencarian dan filter kategori tanpa reload halaman (*client-side reactive pagination*).
 - **Restok Cepat Satuan**: Tambah persediaan stok langsung dari baris tabel tanpa pindah halaman.
 - **Restok Masal (Bulk Restock)**:
   - Centang beberapa produk di tabel lalu restok sekaligus dalam satu modal batch.
   - Opsi terapkan jumlah dan supplier yang sama ke semua item sekaligus.
 - **Inline Editing Harga**:
   - Klik angka nominal **Harga Jual** atau **HPP** pada tabel untuk mengubah harga secara instan dengan auto-save AJAX.
-- **Kode Produk Unik Otomatis**: Generator otomatis kode ID produk (misal: `BRG-2610-8A3F`) saat penambahan produk baru.
+- **Kode Produk Unik Otomatis**: Generator otomatis kode ID produk unik (misal: `BRG-2610-8A3F`) saat penambahan produk baru.
 
 ### 3. 👥 Manajemen Akses & Pengguna Sistem (RBAC)
 - **Role Pengguna**: Dukungan multi-level user (**Owner**, **Admin**, **Kasir**).
@@ -52,6 +52,21 @@ A modern, fast, responsive web-based Point of Sale (POS) and inventory managemen
 - **Pengaturan Toko**: Konfigurasi nama toko, alamat, kontak WhatsApp, profil, dan catatan struk kasir melalui GUI.
 - **Dukungan Dark Mode**: Beralih tema gelap/terang secara mulus di seluruh halaman sistem.
 
+### 6. 🔒 Keamanan & Proteksi Akses (Security & Hardening)
+- **Proteksi Direktori & Berkas Penting (`.htaccess`)**:
+  - Menonaktifkan *Directory Browsing* (`Options -Indexes`) untuk mencegah peramban melihat isi folder direktori.
+  - Membatasi akses HTTP langsung ke folder internal sistem: `app/config/`, `database/`, `app/models/`, `app/modules/`, `app/views/`, `app/controllers/`, `app/lib/`, `Adodb/`, dan `app/print/`. Hanya berkas aset statis (`app/assets/`) yang diizinkan untuk peramban web.
+  - Memblokir unduhan langsung berkas sensitif berdasarkan ekstensi: `.sql`, `.json`, `.log`, `.ini`, `.example`, `.env`, `.git`.
+- **Header Keamanan HTTP**:
+  - Menetapkan `X-Content-Type-Options: nosniff` (mencegah MIME sniffing).
+  - Menetapkan `X-Frame-Options: SAMEORIGIN` (mencegah serangan Clickjacking).
+  - Menetapkan `X-XSS-Protection: 1; mode=block` dan `Referrer-Policy: strict-origin-when-cross-origin`.
+- **Session Guard & Endpoint Authorization**:
+  - Endpoint `Api.php` dan modul `print.php` dilindungi pemeriksaan sesi aktif (`$_SESSION['userId']`); akses tanpa otorisasi akan otomatis ditolak dengan `403 Forbidden`.
+- **Pencegahan SQL Injection & Sanitasi Input**:
+  - Parameterized binding pada model otentikasi (`LoginModel.php`) dan pengaturan akun (`PengaturanModel.php`).
+  - Validasi ketat tipe data (integer casting & parameter binding) pada modul inventaris (`BarangModel.php`).
+
 ---
 
 ## 🛠️ Teknologi yang Digunakan (Tech Stack)
@@ -67,7 +82,7 @@ A modern, fast, responsive web-based Point of Sale (POS) and inventory managemen
 ## 🚀 Panduan Instalasi (Installation Guide)
 
 ### 1. Prasyarat Sistem
-- Web server lokal (misal: **Laragon**, **XAMPP**, atau **WAMP**)
+- Web server Apache lokal dengan modul `mod_rewrite` & `mod_headers` aktif (misal: **Laragon**, **XAMPP**, atau **WAMP**)
 - PHP versi 7.4 / 8.0 / 8.1 / 8.2
 - MySQL / MariaDB
 
