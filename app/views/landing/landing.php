@@ -70,9 +70,20 @@ $colorStyles = [
 <html lang="id" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title><?= htmlspecialchars($landingData['title']) ?> | Official Links & Katalog</title>
     <meta name="description" content="<?= htmlspecialchars($landingData['bio']) ?>">
+    
+    <!-- PWA Primary Meta Tags -->
+    <link rel="manifest" href="manifest.webmanifest">
+    <meta name="theme-color" content="#059669">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="POS Fashion">
+    <link rel="apple-touch-icon" href="app/assets/img/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="app/assets/img/icon-192.png">
+    <link rel="shortcut icon" href="app/assets/img/icon-192.png">
     <link rel="shortcut icon" href="app/assets/img/icon.png">
     
     <!-- Tailwind CSS v3 CDN -->
@@ -325,6 +336,15 @@ $colorStyles = [
             } else {
                 alert('Tautan: ' + currentUrl);
             }
+        }
+
+        // Register PWA Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('sw.js').catch(function(err) {
+                    console.warn('SW registration failed:', err);
+                });
+            });
         }
     </script>
 </body>

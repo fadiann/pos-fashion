@@ -1,7 +1,6 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+require_once "app/lib/AuthSession.php";
+AuthSession::init();
 
 // Hanya user yang login yang diizinkan mengakses API internal POS
 if (!isset($_SESSION['userId'])) {

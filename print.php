@@ -1,7 +1,6 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+require_once "app/lib/AuthSession.php";
+AuthSession::init();
 
 // Hanya user yang login (kasir/admin/owner) yang diizinkan memproses checkout
 if (!isset($_SESSION['userId'])) {

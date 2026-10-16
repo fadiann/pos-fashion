@@ -1,9 +1,8 @@
 <?php // file: index.php
 error_reporting(E_ALL);
 date_default_timezone_set('Asia/Jakarta');
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+require_once "app/lib/AuthSession.php";
+AuthSession::init();
 require_once 'Adodb/adodb.inc.php';
 require_once "app/config/Database.php";
 require_once "app/lib/Comfunction.php";

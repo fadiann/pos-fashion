@@ -12,7 +12,18 @@ $username  = $_SESSION['username'] ?? 'Kasir';
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Bakul Sepatu Solo | Modern POS</title>
+    <title>POS Fashion | Modern POS</title>
+    
+    <!-- PWA Primary Meta Tags -->
+    <link rel="manifest" href="manifest.webmanifest">
+    <meta name="theme-color" content="#059669">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="POS Fashion">
+    <link rel="apple-touch-icon" href="app/assets/img/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="app/assets/img/icon-192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="app/assets/img/icon-192.png">
     
     <script>
         const isDarkMode = localStorage.getItem('app_theme') === 'dark' || (!('app_theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
@@ -319,6 +330,12 @@ $username  = $_SESSION['username'] ?? 'Kasir';
                 <i class="fa-regular fa-clock text-emerald-600 dark:text-emerald-400"></i>
                 <span id="MyClockDisplay">00:00:00</span>
             </div>
+
+            <!-- PWA Install Button (Tampil otomatis jika aplikasi belum terpasang di Android/Desktop) -->
+            <button id="pwa-install-btn" type="button" onclick="installPWA()" class="hidden items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-md shadow-emerald-600/30 active:scale-95 transition-all cursor-pointer" title="Pasang Aplikasi POS di Android / Desktop">
+                <i class="fa-solid fa-mobile-screen-button text-sm"></i>
+                <span class="hidden sm:inline">Pasang App</span>
+            </button>
 
             <!-- Theme Toggle Button (Light/Dark Mode) -->
             <button id="btn-theme-toggle" type="button" class="p-2 rounded-xl text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-amber-400 hover:bg-slate-100 dark:hover:bg-slate-800 active:scale-95 transition-all" title="Ubah Mode (Terang / Gelap)">
@@ -669,6 +686,58 @@ $username  = $_SESSION['username'] ?? 'Kasir';
                     $('#stok').val(data);
                 }
             });
+        });
+
+        // ==========================================
+        // PWA (Progressive Web App) Service Worker & Install Logic
+        // ==========================================
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('sw.js')
+                    .then(function(registration) {
+                        console.log('POS PWA Service Worker terdaftar dengan scope:', registration.scope);
+                    })
+                    .catch(function(err) {
+                        console.warn('POS PWA Service Worker gagal didaftarkan:', err);
+                    });
+            });
+        }
+
+        let deferredInstallPrompt = null;
+        window.addEventListener('beforeinstallprompt', function(e) {
+            e.preventDefault();
+            deferredInstallPrompt = e;
+            var installBtn = document.getElementById('pwa-install-btn');
+            if (installBtn && !window.matchMedia('(display-mode: standalone)').matches) {
+                installBtn.classList.remove('hidden');
+                installBtn.classList.add('inline-flex');
+            }
+        });
+
+        function installPWA() {
+            if (deferredInstallPrompt) {
+                deferredInstallPrompt.prompt();
+                deferredInstallPrompt.userChoice.then(function(choiceResult) {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('Pengguna menyetujui instalasi PWA POS Fashion');
+                    }
+                    deferredInstallPrompt = null;
+                    var installBtn = document.getElementById('pwa-install-btn');
+                    if (installBtn) {
+                        installBtn.classList.add('hidden');
+                        installBtn.classList.remove('inline-flex');
+                    }
+                });
+            }
+        }
+
+        window.addEventListener('appinstalled', function() {
+            console.log('PWA POS Fashion berhasil diinstal');
+            var installBtn = document.getElementById('pwa-install-btn');
+            if (installBtn) {
+                installBtn.classList.add('hidden');
+                installBtn.classList.remove('inline-flex');
+            }
         });
     </script>
 </body>

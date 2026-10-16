@@ -1,0 +1,56 @@
+{
+  "name": "POS Fashion & Retail",
+  "short_name": "POS Fashion",
+  "description": "Sistem Kasir & Manajemen Toko Fashion, Apparel & Retail",
+  "start_url": "index.php?main=transaksi",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0f172a",
+  "theme_color": "#059669",
+  "lang": "id-ID",
+  "icons": [
+    {
+      "src": "app/assets/img/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "app/assets/img/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "app/assets/img/icon-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Layar Kasir POS",
+      "short_name": "Kasir",
+      "description": "Buka transaksi kasir penjualan langsung",
+      "url": "index.php?main=transaksi",
+      "icons": [{ "src": "app/assets/img/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Katalog & Stok Produk",
+      "short_name": "Produk",
+      "description": "Kelola data produk dan stok",
+      "url": "index.php?main=barang",
+      "icons": [{ "src": "app/assets/img/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Laporan Penjualan",
+      "short_name": "Laporan",
+      "description": "Lihat omset harian dan rekapan keuangan",
+      "url": "index.php?main=laporan",
+      "icons": [{ "src": "app/assets/img/icon-192.png", "sizes": "192x192" }]
+    }
+  ],
+  "categories": ["business", "finance", "productivity", "shopping"]
+}

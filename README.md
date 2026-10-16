@@ -52,11 +52,24 @@ A modern, fast, responsive web-based Point of Sale (POS) and inventory managemen
 - **Pengaturan Toko**: Konfigurasi nama toko, alamat, kontak WhatsApp, profil, dan catatan struk kasir melalui GUI.
 - **Dukungan Dark Mode**: Beralih tema gelap/terang secara mulus di seluruh halaman sistem.
 
-### 6. 🔒 Keamanan & Proteksi Akses (Security & Hardening)
+### 6. 📱 Dukungan Progressive Web App (PWA) Android & Desktop
+- **Bisa Dipasang di Android**: Dapat diinstal langsung ke homescreen perangkat Android (via Google Chrome, Samsung Internet, Edge) maupun Desktop seperti aplikasi native tanpa instalasi APK.
+- **Tampilan Standalone Tanpa URL Bar**: Menghilangkan bar peramban web (*standalone display mode*) sehingga layar kasir lebih lega dan optimal untuk perangkat tablet/smartphone.
+- **Web App Manifest & Adaptive Icons**: Dilengkapi manifest (`manifest.webmanifest`) dengan ikon resolusi tinggi (192px, 512px, maskable, dan Apple touch icon).
+- **Service Worker (`sw.js`) & Offline Fallback**: Caching cerdas untuk aset statis (CSS, JS, fonts, icons) dan halaman fallback offline (`offline.html`) saat koneksi jaringan terputus.
+- **Tombol Pasang Aplikasi**: Tombol pintas "Pasang App" otomatis muncul di header aplikasi untuk mempermudah pemasangan oleh staf toko.
+
+### 7. 🔑 Custom Persistent Session (Anti-Logout / Sekali Login)
+- **Sekali Login Tahan Lama**: Sesi login dikonfigurasi bertahan hingga **1 tahun (365 hari)** sehingga kasir tidak perlu berulang kali memasukkan username dan password saat aplikasi ditutup/dibuka kembali.
+- **Auto-Restore Session via Cryptographic Token**: Menggunakan token cookie persisten dengan enkripsi HMAC (`hash_hmac`). Jika sesi PHP server terhapus atau perangkat di-reboot, sistem otomatis mengenali pengguna dan memulihkan sesi login tanpa interupsi.
+- **Penyimpanan Session Terisolasi**: File session disimpan dalam direktori khusus (`app/storage/sessions/`) terlindung dari pembersihan otomatis (*garbage collection*) oleh sistem operasi lain.
+- **Logout Tetap Aman**: Tombol logout manual tetap tersedia untuk membersihkan sesi aktif dan token cookie secara tuntas saat pergantian staf/shift kerja.
+
+### 8. 🔒 Keamanan & Proteksi Akses (Security & Hardening)
 - **Proteksi Direktori & Berkas Penting (`.htaccess`)**:
   - Menonaktifkan *Directory Browsing* (`Options -Indexes`) untuk mencegah peramban melihat isi folder direktori.
-  - Membatasi akses HTTP langsung ke folder internal sistem: `app/config/`, `database/`, `app/models/`, `app/modules/`, `app/views/`, `app/controllers/`, `app/lib/`, `Adodb/`, dan `app/print/`. Hanya berkas aset statis (`app/assets/`) yang diizinkan untuk peramban web.
-  - Memblokir unduhan langsung berkas sensitif berdasarkan ekstensi: `.sql`, `.json`, `.log`, `.ini`, `.example`, `.env`, `.git`.
+  - Membatasi akses HTTP langsung ke folder internal sistem: `app/config/`, `app/storage/`, `database/`, `app/models/`, `app/modules/`, `app/views/`, `app/controllers/`, `app/lib/`, `Adodb/`, dan `app/print/`. Hanya berkas aset statis (`app/assets/`) yang diizinkan untuk peramban web.
+  - Memblokir unduhan langsung berkas sensitif berdasarkan ekstensi: `.sql`, `.json` (kecuali manifest PWA), `.log`, `.ini`, `.example`, `.env`, `.git`.
 - **Header Keamanan HTTP**:
   - Menetapkan `X-Content-Type-Options: nosniff` (mencegah MIME sniffing).
   - Menetapkan `X-Frame-Options: SAMEORIGIN` (mencegah serangan Clickjacking).
@@ -76,6 +89,7 @@ A modern, fast, responsive web-based Point of Sale (POS) and inventory managemen
 - **Frontend Styling**: [Tailwind CSS](https://tailwindcss.com/) & [Bootstrap 5.3](https://getbootstrap.com/)
 - **Icons & Typography**: Font Awesome 6, Bootstrap Icons, Google Font *Plus Jakarta Sans* & *Syne*
 - **Libraries**: jQuery, Select2, Chart.js
+- **PWA**: W3C Web App Manifest, Service Worker Cache API
 
 ---
 
@@ -83,7 +97,7 @@ A modern, fast, responsive web-based Point of Sale (POS) and inventory managemen
 
 ### 1. Prasyarat Sistem
 - Web server Apache lokal dengan modul `mod_rewrite` & `mod_headers` aktif (misal: **Laragon**, **XAMPP**, atau **WAMP**)
-- PHP versi 7.4 / 8.0 / 8.1 / 8.2
+- PHP versi 7.4 / 8.0 / 8.1 / 8.2 (dengan ekstensi `gd` aktif untuk generate gambar)
 - MySQL / MariaDB
 
 ### 2. Kloning Repositori
@@ -116,6 +130,12 @@ Buka browser dan akses:
 - **Landing Page**: `http://localhost/pos-fashion/`
 - **Layar Kasir POS**: `http://localhost/pos-fashion/index.php?main=transaksi`
 - **Login Admin/Kasir**: `http://localhost/pos-fashion/index.php?main=login`
+
+### 5. Memasang Aplikasi di Android (PWA)
+1. Buka browser **Google Chrome** di ponsel Android.
+2. Akses alamat web sistem POS.
+3. Klik tombol **"Pasang App"** pada header kasir, atau tap menu titik tiga Chrome lalu pilih **"Tambahkan ke Layar Utama" / "Install Aplikasi"**.
+4. Ikon **POS Fashion** akan terpasang di menu aplikasi dan berjalan dalam mode layar penuh tanpa address bar browser.
 
 ---
 

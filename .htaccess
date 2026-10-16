@@ -27,13 +27,24 @@ Options -Indexes
     </IfModule>
 </FilesMatch>
 
+# Explicitly allow PWA manifest file
+<FilesMatch "^manifest\.(json|webmanifest)$">
+    <IfModule mod_authz_core.c>
+        Require all granted
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Allow from all
+    </IfModule>
+</FilesMatch>
+
 # 4. Restrict Direct Web Access to Internal Application Folders
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
     # Prevent direct access to internal backend and configuration directories
     # Only static files in app/assets are publicly accessible
-    RewriteRule ^(app/config|database|Adodb|app/models|app/modules|app/views|app/controllers|app/lib|app/print)/ - [F,L,NC]
+    RewriteRule ^(app/config|app/storage|database|Adodb|app/models|app/modules|app/views|app/controllers|app/lib|app/print)/ - [F,L,NC]
 </IfModule>
 
 # 5. Security Headers (Defense in Depth)
