@@ -12,7 +12,7 @@ $username  = $_SESSION['username'] ?? 'Kasir';
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>POS Fashion | Modern POS</title>
+    <title>HKPOS | Modern POS</title>
     
     <!-- PWA Primary Meta Tags -->
     <link rel="manifest" href="manifest.webmanifest">
@@ -20,7 +20,7 @@ $username  = $_SESSION['username'] ?? 'Kasir';
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="POS Fashion">
+    <meta name="apple-mobile-web-app-title" content="HKPOS">
     <link rel="apple-touch-icon" href="app/assets/img/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="192x192" href="app/assets/img/icon-192.png">
     <link rel="icon" type="image/png" sizes="32x32" href="app/assets/img/icon-192.png">
@@ -332,9 +332,9 @@ $username  = $_SESSION['username'] ?? 'Kasir';
             </div>
 
             <!-- PWA Install Button (Tampil otomatis jika aplikasi belum terpasang di Android/Desktop) -->
-            <button id="pwa-install-btn" type="button" onclick="installPWA()" class="hidden items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-md shadow-emerald-600/30 active:scale-95 transition-all cursor-pointer" title="Pasang Aplikasi POS di Android / Desktop">
+            <button id="pwa-install-btn" type="button" onclick="installPWA()" class="hidden items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-md shadow-emerald-600/30 active:scale-95 transition-all cursor-pointer" title="Pasang HKPOS di Android / Desktop">
                 <i class="fa-solid fa-mobile-screen-button text-sm"></i>
-                <span class="hidden sm:inline">Pasang App</span>
+                <span class="hidden sm:inline">Pasang HKPOS</span>
             </button>
 
             <!-- Theme Toggle Button (Light/Dark Mode) -->

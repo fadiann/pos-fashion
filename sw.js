@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pos-fashion-cache-v1';
+const CACHE_NAME = 'hkpos-cache-v2';
 const OFFLINE_URL = 'offline.html';
 
 const STATIC_ASSETS = [
