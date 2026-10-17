@@ -24,7 +24,9 @@ class AuthSession {
             }
 
             // Atur parameter cookie session agar tahan 1 tahun
-            $isSecure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off');
+            $isSecure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+                || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && strtolower($_SERVER['HTTP_X_FORWARDED_PROTO']) === 'https')
+                || (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443);
             @session_set_cookie_params([
                 'lifetime' => self::SESSION_LIFETIME,
                 'path'     => '/',
