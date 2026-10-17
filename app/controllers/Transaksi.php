@@ -50,6 +50,10 @@
                 $unix_id        = (int)($_POST['unix_id']);
                 $idTransaksi    = $Helpers->xss_clean($_POST['idTran']);
                 $execute        = $model->delPesanan($unix_id);
+                AppLogger::action('transaksi', 'Hapus Item Pesanan', "Menghapus item pesanan ID {$unix_id} dari transaksi {$idTransaksi}", [
+                    'unix_id'      => $unix_id,
+                    'transaksi_id' => $idTransaksi
+                ]);
                 header("location: index.php?main=transaksi&idTransaksi=$idTransaksi&success");
                 exit;
 

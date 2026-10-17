@@ -59,11 +59,35 @@ class AppLogger {
                 VALUES 
                 (NOW(), '{$levelSafe}', '{$categorySafe}', {$userIdVal}, '{$username}', '{$userRole}', '{$actionSafe}', '{$descSafe}', '{$contextSafe}', '{$ip}', '{$ua}', '{$url}')";
 
-            @$db->query($sql);
+            $res = @$db->query($sql);
+            if (!$res) {
+                self::logToFile($levelSafe, $categorySafe, $actionSafe, $descSafe, 'DB Query Failed');
+            }
             return true;
         } catch (\Throwable $e) {
-            // Fail silently agar tidak menghentikan flow aplikasi utama
+            self::logToFile($levelSafe ?? $level, $categorySafe ?? $category, $actionSafe ?? $action, $descSafe ?? $description, $e->getMessage());
             return false;
+        }
+    }
+
+    /**
+     * Fallback pencatatan log ke file lokal jika database terputus/unreachable
+     */
+    public static function logToFile($level, $category, $action, $description = '', $extra = '') {
+        try {
+            $logDir = dirname(__DIR__) . '/storage/logs';
+            if (!is_dir($logDir)) {
+                @mkdir($logDir, 0755, true);
+            }
+            $logFile = $logDir . '/system_fallback.log';
+            $time = date('Y-m-d H:i:s');
+            $ip = self::getClientIp();
+            $user = $_SESSION['username'] ?? 'Tamu';
+            $extraStr = is_array($extra) ? json_encode($extra, JSON_UNESCAPED_UNICODE) : (string)$extra;
+            $line = "[{$time}] [{$level}] [{$category}] [User: {$user}] [IP: {$ip}] Action: {$action} | Desc: {$description} | Detail: {$extraStr}" . PHP_EOL;
+            @file_put_contents($logFile, $line, FILE_APPEND | LOCK_EX);
+        } catch (\Throwable $t) {
+            // Ignore if filesystem is not writable
         }
     }
 
