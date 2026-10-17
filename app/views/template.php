@@ -13,6 +13,7 @@ $username  = $_SESSION['username'] ?? 'Kasir';
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>HKPOS | Modern POS</title>
+    <meta name="description" content="Sistem Kasir & Manajemen Toko Fashion, Sepatu & Apparel" />
     
     <!-- PWA Primary Meta Tags -->
     <link rel="manifest" href="manifest.webmanifest">
