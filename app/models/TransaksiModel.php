@@ -192,19 +192,16 @@ class TransaksiModel{
         $this->update_triger($tipe);
     }
     public function hapusTransaksi($idTransaksi){
-        $sql = "DELETE FROM tbl_transaksi WHERE transaksi_id = '$idTransaksi'";
+        $idTransaksi = addslashes(trim($idTransaksi));
         $this->hapusTransaksiFromPesanan($idTransaksi);
-        //echo $sql;
+        $sql = "DELETE FROM tbl_transaksi WHERE transaksi_id = '$idTransaksi'";
         $this->db->query($sql);
-        $tipe = '';
-        $this->update_triger($tipe);
+        $this->update_triger('');
     }
     public function hapusTransaksiFromPesanan($idTransaksi){
+        $idTransaksi = addslashes(trim($idTransaksi));
         $sql = "DELETE FROM tbl_pesanan WHERE transaksi_id = '$idTransaksi'";
-        //echo $sql;
         $this->db->query($sql);
-        $tipe = '';
-        $this->update_triger($tipe);
     }
     
     public function hargaGojek($nomial = 0) {

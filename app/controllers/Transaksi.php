@@ -1,9 +1,8 @@
 <?php
     require_once models."TransaksiModel.php";
     require_once models."BarangModel.php";
-    $model       = new TransaksiModel();
-    $BarangModel = new BarangModel();
-    $daftarBarang = $BarangModel->getAllBarang();
+    $model = new TransaksiModel();
+
     if(isset($_POST['action'])){
         $action = htmlspecialchars($_POST['action']);
         switch ($action) {
@@ -19,7 +18,7 @@
                 ]);
                 header("location: index.php?main=transaksi&idTransaksi=$idTran&success");
                 exit;
-                break;
+
             case 'tambahpesanan':
                 $idTransaksi    = $Helpers->xss_clean($_POST['idtransaksi']);
                 $pesanan        = trim($Helpers->xss_clean($_POST['pesanan']));
@@ -36,7 +35,7 @@
                 ]);
                 header("location: index.php?main=transaksi&idTransaksi=$idTransaksi&success");
                 exit;
-                break;
+
             case 'checkTran':
                 $idTransaksi = $Helpers->xss_clean($_POST['idTransaksi']);
                 $checkTran   = $model->checkTran($idTransaksi);
@@ -44,37 +43,37 @@
                     'transaksi_id' => $idTransaksi
                 ]);
                 header("location: index.php?main=transaksi&success");
-                break;
+                exit;
+
             case 'deletetransaksi':
-                $unix_id        = (int)($_POST['unix_id']);
-                $idTransaksi    = $Helpers->xss_clean($_POST['idTran']);
-                $execute        = $model->delPesanan($unix_id);
-                header("location: index.php?main=transaksi&idTransaksi=$idTransaksi&success");
-                break;
             case 'deletepesanan':
                 $unix_id        = (int)($_POST['unix_id']);
                 $idTransaksi    = $Helpers->xss_clean($_POST['idTran']);
                 $execute        = $model->delPesanan($unix_id);
                 header("location: index.php?main=transaksi&idTransaksi=$idTransaksi&success");
-                break;
+                exit;
+
             case 'edittransaksi':
                 $idTransaksi  = $Helpers->xss_clean($_GET['idTransaksi']);
                 $pelanggan_id = $Helpers->xss_clean($_POST['pelanggan_id']);
                 $tipe         = $Helpers->xss_clean($_POST['tipe']);
                 $execute      = $model->editTransaksi($idTransaksi, $pelanggan_id, $tipe);
                 header("location: index.php?main=transaksi&idTransaksi=$idTransaksi&success");
-                break;
+                exit;
             
             default:
                 break;
         }
     }
+
     if(isset($_GET['idTransaksi'])){
         @$action = $_GET['action'];
         if($action == 'deletetransaksi'){
-            $idTransaksi        = $Helpers->xss_clean($_GET['idTransaksi']);
+            $idTransaksi = $Helpers->xss_clean($_GET['idTransaksi']);
             $model->hapusTransaksi($idTransaksi);
-            header("location: index.php?main=transaksi&success");
+            AppLogger::action('transaksi', 'Hapus Transaksi', "Menghapus transaksi {$idTransaksi}", ['transaksi_id' => $idTransaksi]);
+            header("location: index.php?main=transaksi&success=deleted");
+            exit;
         }else{
             $idTransaksi        = $Helpers->xss_clean($_GET['idTransaksi']);
             $viewlistpesanan    = $model->getPesanan($idTransaksi);
@@ -82,6 +81,9 @@
         }
     }
     
+    // Query data hanya saat halaman tampilan akan dirender
+    $BarangModel     = new BarangModel();
+    $daftarBarang    = $BarangModel->getAllBarang();
     $viewlist        = $model->getAllTransaksiToday();
     $viewlistgojek   = $model->getAllTransaksiTodayGojek();
     $ringkasanHarian = $model->getRingkasanHarianKasir();
