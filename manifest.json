@@ -1,7 +1,7 @@
 {
   "name": "HKPOS",
   "short_name": "HKPOS",
-  "description": "Sistem Kasir & Manajemen Toko Fashion, Apparel & Retail",
+  "description": "Sistem Kasir & Manajemen Toko Fashion, Sepatu & Apparel",
   "start_url": "index.php?main=transaksi",
   "scope": "./",
   "display": "standalone",
