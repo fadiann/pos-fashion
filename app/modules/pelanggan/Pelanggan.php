@@ -18,8 +18,20 @@ switch ($action) {
         break;
     case 'postdelete': 
         $execute = $model->deletePelanggan($pelanggan_id);
-        header("location:index.php?main=pelanggan&success");
-        break;
+        AppLogger::action('pelanggan', 'Hapus Pelanggan', "Menghapus pelanggan ID {$pelanggan_id}", ['pelanggan_id' => $pelanggan_id]);
+        header("location:index.php?main=pelanggan&success=deleted");
+        exit;
+    case 'postdelete_bulk':
+        $pelanggan_ids = $_POST['pelanggan_ids'] ?? [];
+        if (!empty($pelanggan_ids) && is_array($pelanggan_ids)) {
+            $model->deleteMultiplePelanggan($pelanggan_ids);
+            $cnt = count($pelanggan_ids);
+            AppLogger::action('pelanggan', 'Hapus Banyak Pelanggan (Bulk)', "Menghapus {$cnt} pelanggan sekaligus", ['pelanggan_ids' => $pelanggan_ids]);
+            header("location:index.php?main=pelanggan&success=bulk_deleted&count={$cnt}");
+        } else {
+            header("location:index.php?main=pelanggan");
+        }
+        exit;
     case 'edit': 
         $pelanggan_id = $Helpers->xss_clean($_GET['id']);
         $viewlist     = $model->getEditPelanggan($pelanggan_id);

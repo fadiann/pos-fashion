@@ -487,22 +487,44 @@ $username  = $_SESSION['username'] ?? 'Kasir';
                 </div>
                 <?php endif; ?>
 
-                <!-- GRUP MENU KHUSUS ADMINISTRATOR SISTEM (STANDAR TANPA HIGHLIGHT) -->
-                <?php if($userLevel === 'admin'): ?>
+                <!-- GRUP MENU PENGATURAN SISTEM & AUDIT -->
+                <?php 
+                $canMigrasi   = RoleManager::can($userLevel, 'migrasi');
+                $canPengguna  = RoleManager::can($userLevel, 'pengguna');
+                $canRoleAkses = RoleManager::can($userLevel, 'role_akses');
+                $canLogSistem = RoleManager::can($userLevel, 'log_sistem');
+                $hasSystemMenu = $canMigrasi || $canPengguna || $canRoleAkses || $canLogSistem;
+                ?>
+                <?php if($hasSystemMenu): ?>
                 <div class="pt-4 px-3 pb-2 text-[11px] font-bold uppercase tracking-wider text-slate-400">Pengaturan Sistem</div>
                 <div class="space-y-1">
+                    <?php if($canMigrasi): ?>
                     <a href="index.php?main=migrasi" class="flex items-center gap-3 px-3.5 py-2 rounded-xl text-sm transition-all no-underline <?= ($main == 'migrasi') ? 'bg-slate-800 text-white font-semibold' : 'text-slate-300 hover:bg-slate-800 hover:text-white' ?>">
                         <i class="fa-solid fa-database text-sm text-slate-400"></i>
                         <span>Migrasi Database</span>
                     </a>
+                    <?php endif; ?>
+
+                    <?php if($canPengguna): ?>
                     <a href="index.php?main=pengguna" class="flex items-center gap-3 px-3.5 py-2 rounded-xl text-sm transition-all no-underline <?= ($main == 'pengguna') ? 'bg-slate-800 text-white font-semibold' : 'text-slate-300 hover:bg-slate-800 hover:text-white' ?>">
                         <i class="fa-solid fa-users-gear text-sm text-slate-400"></i>
                         <span>Kelola Pengguna</span>
                     </a>
+                    <?php endif; ?>
+
+                    <?php if($canRoleAkses): ?>
                     <a href="index.php?main=role_akses" class="flex items-center gap-3 px-3.5 py-2 rounded-xl text-sm transition-all no-underline <?= ($main == 'role_akses') ? 'bg-slate-800 text-white font-semibold' : 'text-slate-300 hover:bg-slate-800 hover:text-white' ?>">
                         <i class="fa-solid fa-user-shield text-sm text-slate-400"></i>
                         <span>Hak Akses Role</span>
                     </a>
+                    <?php endif; ?>
+
+                    <?php if($canLogSistem): ?>
+                    <a href="index.php?main=log_sistem" class="flex items-center gap-3 px-3.5 py-2 rounded-xl text-sm transition-all no-underline <?= ($main == 'log_sistem') ? 'bg-slate-800 text-white font-semibold' : 'text-slate-300 hover:bg-slate-800 hover:text-white' ?>">
+                        <i class="fa-solid fa-clock-rotate-left text-sm text-slate-400"></i>
+                        <span>Log & Audit Sistem</span>
+                    </a>
+                    <?php endif; ?>
                 </div>
                 <?php endif; ?>
 

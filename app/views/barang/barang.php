@@ -56,7 +56,18 @@ window.ALL_SUPPLIERS_DATA = <?= json_encode($allSuppliers, JSON_HEX_TAG | JSON_H
         <div class="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 flex items-center justify-between text-emerald-800 dark:text-emerald-300 text-xs font-semibold animate-fade-in">
             <div class="flex items-center gap-2">
                 <i class="fa-solid fa-circle-check text-base text-emerald-500"></i>
-                <span>Operasi berhasil disimpan ke sistem!</span>
+                <span>
+                    <?php 
+                    if ($_GET['success'] === 'deleted') {
+                        echo 'Data produk berhasil dihapus!';
+                    } elseif ($_GET['success'] === 'bulk_deleted') {
+                        $cnt = isset($_GET['count']) ? (int)$_GET['count'] : 0;
+                        echo "Berhasil menghapus {$cnt} data produk sekaligus!";
+                    } else {
+                        echo 'Operasi berhasil disimpan ke sistem!';
+                    }
+                    ?>
+                </span>
             </div>
             <button type="button" onclick="this.parentElement.remove()" class="text-emerald-600 dark:text-emerald-400 hover:text-emerald-900 dark:hover:text-emerald-100">
                 <i class="fa-solid fa-xmark"></i>
@@ -308,11 +319,20 @@ window.ALL_SUPPLIERS_DATA = <?= json_encode($allSuppliers, JSON_HEX_TAG | JSON_H
             <i class="fa-solid fa-boxes-stacked text-xs"></i>
             <span>Restok Produk Terpilih</span>
         </button>
+        <button type="button" onclick="confirmBulkDeleteProduk()" class="px-4 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-rose-600/30 active:scale-95 transition-all">
+            <i class="fa-solid fa-trash-can text-xs"></i>
+            <span>Hapus Produk Terpilih</span>
+        </button>
         <button type="button" onclick="clearSelectedProduk()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition-colors">
             Batal
         </button>
     </div>
 </div>
+
+<!-- FORM BULK DELETE BARANG -->
+<form id="formBulkDeleteBarang" action="index.php?main=barang" method="post" style="display: none;">
+    <input type="hidden" name="action" value="postdelete_bulk">
+</form>
 
 <!-- ============================================== -->
 <!-- MODAL 1: RESTOK CEPAT SATUAN (QUICK RESTOCK)   -->
@@ -668,6 +688,27 @@ function clearSelectedProduk() {
     const mainCb = document.getElementById('checkAllProduk');
     if (mainCb) mainCb.checked = false;
     onProductCheckChange();
+}
+
+function confirmBulkDeleteProduk() {
+    const checked = document.querySelectorAll('.check-item-produk:checked');
+    if (checked.length === 0) {
+        alert('Silakan pilih minimal 1 produk yang ingin dihapus.');
+        return;
+    }
+    const confirmed = confirm(`Apakah Anda yakin ingin menghapus ${checked.length} produk yang dipilih secara permanen?`);
+    if (!confirmed) return;
+
+    const form = document.getElementById('formBulkDeleteBarang');
+    form.innerHTML = '<input type="hidden" name="action" value="postdelete_bulk">';
+    checked.forEach(cb => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'barang_ids[]';
+        input.value = cb.value;
+        form.appendChild(input);
+    });
+    form.submit();
 }
 
 // ==========================================

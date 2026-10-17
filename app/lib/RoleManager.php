@@ -95,6 +95,12 @@ class RoleManager {
                 'group'       => 'Pengaturan Sistem',
                 'icon'        => 'fa-solid fa-user-shield text-rose-500',
                 'description' => 'Matriks perizinan dan kewenangan akses modul per group'
+            ],
+            'log_sistem' => [
+                'name'        => 'Log & Audit Sistem',
+                'group'       => 'Pengaturan Sistem',
+                'icon'        => 'fa-solid fa-clock-rotate-left text-amber-500',
+                'description' => 'Monitoring aktivitas user, mutasi data, audit trail, dan error log'
             ]
         ];
     }

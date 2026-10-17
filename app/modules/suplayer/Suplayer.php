@@ -18,8 +18,20 @@ switch ($action) {
         break;
     case 'postdelete': 
         $execute = $model->deleteSuplayer($suplayer_id);
-        header("location:index.php?main=suplayer&success");
-        break;
+        AppLogger::action('produk', 'Hapus Supplier', "Menghapus supplier ID {$suplayer_id}", ['suplayer_id' => $suplayer_id]);
+        header("location:index.php?main=suplayer&success=deleted");
+        exit;
+    case 'postdelete_bulk':
+        $suplayer_ids = $_POST['suplayer_ids'] ?? [];
+        if (!empty($suplayer_ids) && is_array($suplayer_ids)) {
+            $model->deleteMultipleSuplayer($suplayer_ids);
+            $cnt = count($suplayer_ids);
+            AppLogger::action('produk', 'Hapus Banyak Supplier (Bulk)', "Menghapus {$cnt} supplier sekaligus", ['suplayer_ids' => $suplayer_ids]);
+            header("location:index.php?main=suplayer&success=bulk_deleted&count={$cnt}");
+        } else {
+            header("location:index.php?main=suplayer");
+        }
+        exit;
     case 'edit': 
         $suplayer_id = $Helpers->xss_clean($_GET['id']);
         $viewlist     = $model->getEditSuplayer($suplayer_id);

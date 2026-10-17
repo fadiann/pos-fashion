@@ -35,4 +35,15 @@ class SuplayerModel {
         $sql = "DELETE FROM tbl_suplayer where suplayer_id = '$suplayer_id'";
         $this->db->query($sql);
     }
+    public function deleteMultipleSuplayer($suplayer_ids){
+        if (empty($suplayer_ids) || !is_array($suplayer_ids)) {
+            return false;
+        }
+        $cleanIds = array_map(function($id) {
+            return "'" . addslashes(trim($id)) . "'";
+        }, $suplayer_ids);
+        $idList = implode(',', $cleanIds);
+        $sql = "DELETE FROM tbl_suplayer WHERE suplayer_id IN ($idList)";
+        return $this->db->query($sql);
+    }
 }

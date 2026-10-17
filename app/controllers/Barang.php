@@ -22,6 +22,13 @@ switch ($action) {
         }
 
         $ok = $barangs->updateInlineField($barangid, $col, $val);
+        if ($ok) {
+            AppLogger::action('produk', 'Ubah Harga Produk', "Produk ID {$barangid}: {$field} diubah menjadi {$Helpers->rp($val)}", [
+                'barang_id' => $barangid,
+                'field'     => $field,
+                'new_value' => $val
+            ]);
+        }
         echo json_encode([
             'success'   => (bool)$ok,
             'field'     => $field,
@@ -44,6 +51,12 @@ switch ($action) {
         }
 
         $barangs->addStok($produk_id, $size_id, $suplayer_id, $jumlah, $keterangan);
+        AppLogger::action('stok', 'Restok Cepat', "Produk ID {$produk_id}: Masuk {$jumlah} pcs (Size {$size_id})", [
+            'produk_id' => $produk_id,
+            'size_id'   => $size_id,
+            'supplier'  => $suplayer_id,
+            'jumlah'    => $jumlah
+        ]);
         echo json_encode([
             'success' => true,
             'message' => "Stok berhasil ditambahkan sebanyak {$jumlah} pcs!"
@@ -109,8 +122,20 @@ switch ($action) {
         break;
     case 'postdelete': 
         $execute = $barangs->deleteBarang($barangid);
-        header("location:index.php?main=barang&success");
-        break;
+        AppLogger::action('produk', 'Hapus Produk', "Menghapus produk ID {$barangid}", ['barang_id' => $barangid]);
+        header("location:index.php?main=barang&success=deleted");
+        exit;
+    case 'postdelete_bulk':
+        $barang_ids = $_POST['barang_ids'] ?? [];
+        if (!empty($barang_ids) && is_array($barang_ids)) {
+            $barangs->deleteMultipleBarang($barang_ids);
+            $cnt = count($barang_ids);
+            AppLogger::action('produk', 'Hapus Banyak Produk (Bulk)', "Menghapus {$cnt} produk sekaligus", ['barang_ids' => $barang_ids]);
+            header("location:index.php?main=barang&success=bulk_deleted&count={$cnt}");
+        } else {
+            header("location:index.php?main=barang");
+        }
+        exit;
     case 'postaddstokmasuk': 
         $produk_id   = $Helpers->xss_clean($_REQUEST['barangid']);
         $size_id     = $Helpers->xss_clean($_REQUEST['size']);

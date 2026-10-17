@@ -19,8 +19,20 @@ switch ($action) {
     case 'postdelete': 
         $kategori_id = $Helpers->xss_clean($_REQUEST['kategori_id']);
         $execute = $model->deleteKategori($kategori_id);
-        header("location:index.php?main=kategori&success");
-        break;
+        AppLogger::action('produk', 'Hapus Kategori', "Menghapus kategori ID {$kategori_id}", ['kategori_id' => $kategori_id]);
+        header("location:index.php?main=kategori&success=deleted");
+        exit;
+    case 'postdelete_bulk':
+        $kategori_ids = $_POST['kategori_ids'] ?? [];
+        if (!empty($kategori_ids) && is_array($kategori_ids)) {
+            $model->deleteMultipleKategori($kategori_ids);
+            $cnt = count($kategori_ids);
+            AppLogger::action('produk', 'Hapus Banyak Kategori (Bulk)', "Menghapus {$cnt} kategori sekaligus", ['kategori_ids' => $kategori_ids]);
+            header("location:index.php?main=kategori&success=bulk_deleted&count={$cnt}");
+        } else {
+            header("location:index.php?main=kategori");
+        }
+        exit;
     case 'edit': 
         $kategori_id = $Helpers->xss_clean($_GET['id']);
         $viewlist     = $model->getEditKategori($kategori_id);

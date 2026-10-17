@@ -6,7 +6,9 @@ AuthSession::init();
 require_once 'Adodb/adodb.inc.php';
 require_once "app/config/Database.php";
 require_once "app/lib/Comfunction.php";
+require_once "app/lib/AppLogger.php";
 require_once "app/models/LaporanModel.php";
+AppLogger::registerGlobalErrorHandlers();
 $DB      = new Database();
 $Helpers = new Comfunction();
 $Laporan = new LaporanModel();
@@ -44,7 +46,7 @@ if(!isset($_SESSION['userId'])){
         // Proteksi Otorisasi Dinamis berbasis Role & Permission Database
         if (!RoleManager::can($userLevel, $main)) {
             $adminOnly = ['pengguna', 'migrasi', 'role_akses'];
-            if (in_array($main, $adminOnly)) {
+            if (in_array($main, $adminOnly) && $userLevel !== 'admin') {
                 header("location:index.php?access_denied=admin_only");
             } else {
                 header("location:index.php?main=transaksi&access_denied=restricted");
@@ -97,6 +99,10 @@ if(!isset($_SESSION['userId'])){
 
         }elseif($main == "role_akses"){
             require_once modules."role_akses/RoleAkses.php";
+            include_once views."template.php";
+
+        }elseif($main == "log_sistem"){
+            require_once modules."log_sistem/LogSistem.php";
             include_once views."template.php";
 
         // end pakek modules

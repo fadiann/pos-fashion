@@ -117,6 +117,18 @@ class BarangModel {
         $this->db->query($sql);
     }
     
+    public function deleteMultipleBarang($barang_ids) {
+        if (empty($barang_ids) || !is_array($barang_ids)) {
+            return false;
+        }
+        $cleanIds = array_map(function($id) {
+            return "'" . addslashes(trim($id)) . "'";
+        }, $barang_ids);
+        $idList = implode(',', $cleanIds);
+        $sql = "DELETE FROM tbl_barang WHERE barang_id IN ($idList)";
+        return $this->db->query($sql);
+    }
+    
     function getStokProduk($produk_id, $size_id){
         $stoks               = $this->getStokByProdukSize($produk_id, $size_id);
         $total_sold_per_size = $this->getSoldByProdukSize($produk_id, $size_id);

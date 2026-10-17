@@ -35,4 +35,17 @@ class KategoriModel {
         $sql = "DELETE FROM tbl_kategori where kategori_id = '$kategori_id'";
         $this->db->query($sql);
     }
+    public function deleteMultipleKategori($kategori_ids){
+        if (empty($kategori_ids) || !is_array($kategori_ids)) {
+            return false;
+        }
+        $cleanIds = array_map('intval', $kategori_ids);
+        $cleanIds = array_filter($cleanIds, fn($id) => $id > 0);
+        if (empty($cleanIds)) {
+            return false;
+        }
+        $idList = implode(',', $cleanIds);
+        $sql = "DELETE FROM tbl_kategori WHERE kategori_id IN ($idList)";
+        return $this->db->query($sql);
+    }
 }

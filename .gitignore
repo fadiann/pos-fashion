@@ -28,12 +28,13 @@ $RECYCLE.BIN/
 # Database dumps and SQL files
 *.sql
 database/*.sql
-database/
 
 # Configuration files with credentials / local settings
 app/config/Database.php
 app/config/store_config.json
 app/config/landing_config.json
+deploy.py
+deploy_config.json
 
 # Temporary / Log files
 *.log

@@ -12,6 +12,11 @@
                 $pelanggan_id   = $Helpers->xss_clean($_POST['pelanggan_id'] ?? '1');
                 $tipe           = $Helpers->xss_clean($_POST['tipe'] ?? '0');
                 $execute        = $model->addTransaksi($idTran, $pelanggan_id, $tipe);
+                AppLogger::action('transaksi', 'Mulai Transaksi Baru', "Nomor Transaksi: {$idTran}", [
+                    'transaksi_id' => $idTran,
+                    'pelanggan_id' => $pelanggan_id,
+                    'tipe'         => $tipe
+                ]);
                 header("location: index.php?main=transaksi&idTransaksi=$idTran&success");
                 exit;
                 break;
@@ -23,12 +28,21 @@
                 $jumlah         = (int)($_POST['jumlah']);
                 $keterangan     = $Helpers->xss_clean($_POST['keterangan'] ?? '');
                 $execute        = $model->addPesanan($idTransaksi, $pesananId[0], $size_id, $jumlah, $keterangan);
+                AppLogger::action('transaksi', 'Tambah Item Belanja', "Transaksi {$idTransaksi}: Item {$pesanan} ({$jumlah} pcs)", [
+                    'transaksi_id' => $idTransaksi,
+                    'barang_id'    => $pesananId[0],
+                    'size_id'      => $size_id,
+                    'qty'          => $jumlah
+                ]);
                 header("location: index.php?main=transaksi&idTransaksi=$idTransaksi&success");
                 exit;
                 break;
             case 'checkTran':
                 $idTransaksi = $Helpers->xss_clean($_POST['idTransaksi']);
                 $checkTran   = $model->checkTran($idTransaksi);
+                AppLogger::action('transaksi', 'Pembayaran Selesai', "Transaksi {$idTransaksi} berhasil dibayar & diselesaikan.", [
+                    'transaksi_id' => $idTransaksi
+                ]);
                 header("location: index.php?main=transaksi&success");
                 break;
             case 'deletetransaksi':

@@ -35,4 +35,15 @@ class PelangganModel {
         $sql = "DELETE FROM tbl_pelanggan where pelanggan_id = '$pelanggan_id'";
         $this->db->query($sql);
     }
+    public function deleteMultiplePelanggan($pelanggan_ids){
+        if (empty($pelanggan_ids) || !is_array($pelanggan_ids)) {
+            return false;
+        }
+        $cleanIds = array_map(function($id) {
+            return "'" . addslashes(trim($id)) . "'";
+        }, $pelanggan_ids);
+        $idList = implode(',', $cleanIds);
+        $sql = "DELETE FROM tbl_pelanggan WHERE pelanggan_id IN ($idList)";
+        return $this->db->query($sql);
+    }
 }

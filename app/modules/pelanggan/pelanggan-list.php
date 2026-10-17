@@ -45,42 +45,53 @@
         </div>
     </div>
 
-    <!-- TABLE PELANGGAN -->
-    <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-sm overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs text-slate-600 dark:text-slate-300" id="table-pelanggan">
-                <thead class="bg-slate-50 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 uppercase font-bold text-[11px] border-b border-slate-200/80 dark:border-slate-800 tracking-wider">
-                    <tr>
-                        <th class="py-3 px-3 md:px-4 text-center w-16">ID</th>
-                        <th class="py-3 px-3 md:px-4">Nama Pelanggan</th>
-                        <th class="py-3 px-3 md:px-4">Nomor HP / WhatsApp</th>
-                        <th class="py-3 px-3 md:px-4">Alamat</th>
-                        <th class="py-3 px-3 md:px-4 text-center w-28">Status</th>
-                        <th class="py-3 px-3 md:px-4 text-center w-28">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody id="pelangganTableBody" class="divide-y divide-slate-100 dark:divide-slate-800">
-                    <?php if (empty($viewlist)): ?>
+    <!-- TABLE PELANGGAN DENGAN BULK CHECKLIST FORM -->
+    <form id="formBulkDeletePelanggan" action="index.php?main=pelanggan" method="post" onsubmit="return confirmBulkDeletePelanggan(event)">
+        <input type="hidden" name="action" value="postdelete_bulk">
+
+        <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs text-slate-600 dark:text-slate-300" id="table-pelanggan">
+                    <thead class="bg-slate-50 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 uppercase font-bold text-[11px] border-b border-slate-200/80 dark:border-slate-800 tracking-wider">
                         <tr>
-                            <td colspan="6" class="py-8 text-center text-slate-400 dark:text-slate-500">
-                                <i class="fa-solid fa-users-slash text-2xl mb-2 block"></i>
-                                Belum ada data pelanggan yang terdaftar
-                            </td>
+                            <th class="py-3 px-3 text-center w-12">
+                                <input type="checkbox" id="checkAllPelanggan" class="w-4 h-4 rounded border-slate-300 text-rose-600 focus:ring-rose-500 cursor-pointer">
+                            </th>
+                            <th class="py-3 px-3 md:px-4 text-center w-16">ID</th>
+                            <th class="py-3 px-3 md:px-4">Nama Pelanggan</th>
+                            <th class="py-3 px-3 md:px-4">Nomor HP / WhatsApp</th>
+                            <th class="py-3 px-3 md:px-4">Alamat</th>
+                            <th class="py-3 px-3 md:px-4 text-center w-28">Status</th>
+                            <th class="py-3 px-3 md:px-4 text-center w-28">Aksi</th>
                         </tr>
-                    <?php else: ?>
-                        <?php foreach ($viewlist as $row): 
-                            $status = $row['pelanggan_status'];
-                            $hp = trim($row['pelanggan_nomor']);
-                            // Clean phone for whatsapp
-                            $wa = preg_replace('/[^0-9]/', '', $hp);
-                            if (str_starts_with($wa, '0')) {
-                                $wa = '62' . substr($wa, 1);
-                            }
-                        ?>
-                            <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors pelanggan-row" data-search="<?= strtolower(htmlspecialchars($row['pelanggan_id'] . ' ' . $row['pelanggan_nama'] . ' ' . $row['pelanggan_nomor'] . ' ' . $row['pelanggan_alamat'])) ?>">
-                                <td class="py-3 px-3 md:px-4 text-center font-mono font-bold text-slate-500 dark:text-slate-400">
-                                    #<?= htmlspecialchars($row['pelanggan_id']) ?>
+                    </thead>
+                    <tbody id="pelangganTableBody" class="divide-y divide-slate-100 dark:divide-slate-800">
+                        <?php if (empty($viewlist)): ?>
+                            <tr>
+                                <td colspan="7" class="py-8 text-center text-slate-400 dark:text-slate-500">
+                                    <i class="fa-solid fa-users-slash text-2xl mb-2 block"></i>
+                                    Belum ada data pelanggan yang terdaftar
                                 </td>
+                            </tr>
+                        <?php else: ?>
+                            <?php foreach ($viewlist as $row): 
+                                $status = $row['pelanggan_status'];
+                                $hp = trim($row['pelanggan_nomor']);
+                                // Clean phone for whatsapp
+                                $wa = preg_replace('/[^0-9]/', '', $hp);
+                                if (str_starts_with($wa, '0')) {
+                                    $wa = '62' . substr($wa, 1);
+                                }
+                            ?>
+                                <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors pelanggan-row" data-search="<?= strtolower(htmlspecialchars($row['pelanggan_id'] . ' ' . $row['pelanggan_nama'] . ' ' . $row['pelanggan_nomor'] . ' ' . $row['pelanggan_alamat'])) ?>">
+                                    <!-- Checkbox Item -->
+                                    <td class="py-3 px-3 text-center">
+                                        <input type="checkbox" name="pelanggan_ids[]" value="<?= htmlspecialchars($row['pelanggan_id']) ?>" class="pelanggan-checkbox w-4 h-4 rounded border-slate-300 text-rose-600 focus:ring-rose-500 cursor-pointer">
+                                    </td>
+
+                                    <td class="py-3 px-3 md:px-4 text-center font-mono font-bold text-slate-500 dark:text-slate-400">
+                                        #<?= htmlspecialchars($row['pelanggan_id']) ?>
+                                    </td>
                                 <td class="py-3 px-3 md:px-4">
                                     <div class="font-bold text-slate-900 dark:text-white text-xs">
                                         <?= htmlspecialchars($row['pelanggan_nama']) ?>
@@ -121,13 +132,9 @@
                                         <a href="?main=pelanggan&action=edit&id=<?= $row['pelanggan_id'] ?>" class="w-7 h-7 rounded-lg bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900 border border-amber-200 dark:border-amber-800 flex items-center justify-center transition-colors text-xs" title="Edit Pelanggan">
                                             <i class="fa-solid fa-pen-to-square"></i>
                                         </a>
-                                        <form action="" method="post" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data pelanggan ini?');" class="inline-block m-0">
-                                            <input type="hidden" value="postdelete" name="action">
-                                            <input type="hidden" value="<?= $row['pelanggan_id'] ?>" name="pelanggan_id">
-                                            <button type="submit" class="w-7 h-7 rounded-lg bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900 border border-rose-200 dark:border-rose-800 flex items-center justify-center transition-colors text-xs" title="Hapus Pelanggan">
-                                                <i class="fa-solid fa-trash-can"></i>
-                                            </button>
-                                        </form>
+                                        <button type="button" onclick="singleDeletePelanggan('<?= $row['pelanggan_id'] ?>', '<?= htmlspecialchars($row['pelanggan_nama'], ENT_QUOTES) ?>')" class="w-7 h-7 rounded-lg bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900 border border-rose-200 dark:border-rose-800 flex items-center justify-center transition-colors text-xs" title="Hapus Pelanggan">
+                                            <i class="fa-solid fa-trash-can"></i>
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -137,6 +144,31 @@
             </table>
         </div>
     </div>
+
+    <!-- FLOATING BULK ACTION BAR -->
+    <div id="floatingPelangganBulkBar" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl border border-slate-700 flex items-center gap-4 animate-in fade-in slide-in-from-bottom-3 duration-200">
+        <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse"></span>
+            <span id="selectedPelangganCountText" class="text-xs font-bold text-slate-100">0 Pelanggan Terpilih</span>
+        </div>
+        <div class="h-4 w-px bg-slate-700"></div>
+        <div class="flex items-center gap-2">
+            <button type="submit" class="px-4 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-rose-600/30 active:scale-95 transition-all">
+                <i class="fa-solid fa-trash-can text-xs"></i>
+                <span>Hapus Pelanggan Terpilih</span>
+            </button>
+            <button type="button" onclick="clearSelectedPelanggan()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition-colors">
+                Batal
+            </button>
+        </div>
+    </div>
+    </form>
+
+    <!-- FORM HAPUS SATUAN TERSIMPAN -->
+    <form id="formSingleDeletePelanggan" action="index.php?main=pelanggan" method="post" style="display: none;">
+        <input type="hidden" name="action" value="postdelete">
+        <input type="hidden" name="pelanggan_id" id="singleDeletePelangganId" value="">
+    </form>
 
     <!-- PAGINATION CONTAINER -->
     <div id="pelangganPaginationContainer"></div>
@@ -157,7 +189,72 @@ document.addEventListener('DOMContentLoaded', () => {
             if (counter) counter.innerText = info.totalFiltered;
         }
     });
+
+    const checkAll = document.getElementById('checkAllPelanggan');
+    const checkboxes = document.querySelectorAll('.pelanggan-checkbox');
+    const bulkBar = document.getElementById('floatingPelangganBulkBar');
+    const countText = document.getElementById('selectedPelangganCountText');
+
+    function updateBulkBar() {
+        const checked = document.querySelectorAll('.pelanggan-checkbox:checked');
+        if (checked.length > 0) {
+            countText.innerText = checked.length + ' Pelanggan Terpilih';
+            bulkBar.classList.remove('hidden');
+            bulkBar.classList.add('flex');
+        } else {
+            bulkBar.classList.add('hidden');
+            bulkBar.classList.remove('flex');
+            if (checkAll) checkAll.checked = false;
+        }
+    }
+
+    if (checkAll) {
+        checkAll.addEventListener('change', function() {
+            const visibleCheckboxes = document.querySelectorAll('.pelanggan-row:not([style*="display: none"]) .pelanggan-checkbox');
+            visibleCheckboxes.forEach(cb => {
+                cb.checked = checkAll.checked;
+            });
+            updateBulkBar();
+        });
+    }
+
+    checkboxes.forEach(cb => {
+        cb.addEventListener('change', updateBulkBar);
+    });
 });
+
+function clearSelectedPelanggan() {
+    document.querySelectorAll('.pelanggan-checkbox').forEach(cb => cb.checked = false);
+    const checkAll = document.getElementById('checkAllPelanggan');
+    if (checkAll) checkAll.checked = false;
+    const bulkBar = document.getElementById('floatingPelangganBulkBar');
+    if (bulkBar) {
+        bulkBar.classList.add('hidden');
+        bulkBar.classList.remove('flex');
+    }
+}
+
+function confirmBulkDeletePelanggan(e) {
+    const checked = document.querySelectorAll('.pelanggan-checkbox:checked');
+    if (checked.length === 0) {
+        alert('Silakan pilih minimal 1 pelanggan yang ingin dihapus.');
+        e.preventDefault();
+        return false;
+    }
+    const confirmed = confirm(`Apakah Anda yakin ingin menghapus ${checked.length} pelanggan yang dipilih secara permanen?`);
+    if (!confirmed) {
+        e.preventDefault();
+        return false;
+    }
+    return true;
+}
+
+function singleDeletePelanggan(pelangganId, pelangganName) {
+    if (confirm(`Apakah Anda yakin ingin menghapus pelanggan ${pelangganName}?`)) {
+        document.getElementById('singleDeletePelangganId').value = pelangganId;
+        document.getElementById('formSingleDeletePelanggan').submit();
+    }
+}
 </script>
 
 <?php $content = ob_get_clean(); ?>

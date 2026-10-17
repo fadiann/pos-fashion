@@ -6,7 +6,18 @@
         <div class="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200 text-xs font-semibold flex items-center justify-between">
             <div class="flex items-center gap-2">
                 <i class="fa-solid fa-circle-check text-emerald-500"></i>
-                <span>Data supplier berhasil diperbarui!</span>
+                <span>
+                    <?php 
+                    if ($_GET['success'] === 'deleted') {
+                        echo 'Data supplier berhasil dihapus!';
+                    } elseif ($_GET['success'] === 'bulk_deleted') {
+                        $cnt = isset($_GET['count']) ? (int)$_GET['count'] : 0;
+                        echo "Berhasil menghapus {$cnt} data supplier sekaligus!";
+                    } else {
+                        echo 'Data supplier berhasil diperbarui!';
+                    }
+                    ?>
+                </span>
             </div>
             <button onclick="this.parentElement.remove()" class="text-emerald-500 hover:text-emerald-700">
                 <i class="fa-solid fa-xmark"></i>
@@ -45,97 +56,128 @@
         </div>
     </div>
 
-    <!-- TABLE SUPPLIER -->
-    <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-sm overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs text-slate-600 dark:text-slate-300" id="table-suplayer">
-                <thead class="bg-slate-50 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 uppercase font-bold text-[11px] border-b border-slate-200/80 dark:border-slate-800 tracking-wider">
-                    <tr>
-                        <th class="py-3 px-3 md:px-4 text-center w-16">ID</th>
-                        <th class="py-3 px-3 md:px-4">Nama Supplier / Vendor</th>
-                        <th class="py-3 px-3 md:px-4">Kontak HP / WhatsApp</th>
-                        <th class="py-3 px-3 md:px-4">Alamat / Gudang</th>
-                        <th class="py-3 px-3 md:px-4 text-center w-28">Status</th>
-                        <th class="py-3 px-3 md:px-4 text-center w-28">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody id="supplierTableBody" class="divide-y divide-slate-100 dark:divide-slate-800">
-                    <?php if (empty($viewlist)): ?>
+    <!-- FORM BULK DELETE & TABLE SUPPLIER -->
+    <form id="formBulkDeleteSupplier" action="index.php?main=suplayer" method="post" onsubmit="return confirmBulkDeleteSupplier(event)">
+        <input type="hidden" name="action" value="postdelete_bulk">
+
+        <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs text-slate-600 dark:text-slate-300" id="table-suplayer">
+                    <thead class="bg-slate-50 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 uppercase font-bold text-[11px] border-b border-slate-200/80 dark:border-slate-800 tracking-wider">
                         <tr>
-                            <td colspan="6" class="py-8 text-center text-slate-400 dark:text-slate-500">
-                                <i class="fa-solid fa-truck text-2xl mb-2 block"></i>
-                                Belum ada data supplier yang terdaftar
-                            </td>
+                            <th class="py-3 px-3 text-center w-12">
+                                <input type="checkbox" id="checkAllSupplier" class="w-4 h-4 rounded border-slate-300 text-rose-600 focus:ring-rose-500 cursor-pointer">
+                            </th>
+                            <th class="py-3 px-3 md:px-4 text-center w-16">ID</th>
+                            <th class="py-3 px-3 md:px-4">Nama Supplier / Vendor</th>
+                            <th class="py-3 px-3 md:px-4">Kontak HP / WhatsApp</th>
+                            <th class="py-3 px-3 md:px-4">Alamat / Gudang</th>
+                            <th class="py-3 px-3 md:px-4 text-center w-28">Status</th>
+                            <th class="py-3 px-3 md:px-4 text-center w-28">Aksi</th>
                         </tr>
-                    <?php else: ?>
-                        <?php foreach ($viewlist as $row): 
-                            $status = $row['suplayer_status'];
-                            $hp = trim($row['suplayer_nomor']);
-                            $wa = preg_replace('/[^0-9]/', '', $hp);
-                            if (str_starts_with($wa, '0')) {
-                                $wa = '62' . substr($wa, 1);
-                            }
-                        ?>
-                            <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors supplier-row" data-search="<?= strtolower(htmlspecialchars($row['suplayer_id'] . ' ' . $row['suplayer_nama'] . ' ' . $row['suplayer_nomor'] . ' ' . $row['suplayer_alamat'])) ?>">
-                                <td class="py-3 px-3 md:px-4 text-center font-mono font-bold text-slate-500 dark:text-slate-400">
-                                    #<?= htmlspecialchars($row['suplayer_id']) ?>
-                                </td>
-                                <td class="py-3 px-3 md:px-4">
-                                    <div class="font-bold text-slate-900 dark:text-white text-xs">
-                                        <?= htmlspecialchars($row['suplayer_nama']) ?>
-                                    </div>
-                                </td>
-                                <td class="py-3 px-3 md:px-4 font-mono">
-                                    <?php if (!empty($hp)): ?>
-                                        <div class="flex items-center gap-1.5">
-                                            <span><?= htmlspecialchars($hp) ?></span>
-                                            <?php if (!empty($wa)): ?>
-                                                <a href="https://wa.me/<?= $wa ?>" target="_blank" title="Hubungi via WhatsApp" class="inline-flex items-center justify-center w-5 h-5 rounded bg-emerald-100 text-emerald-700 hover:bg-emerald-200 dark:bg-emerald-950/80 dark:text-emerald-400 text-[10px] transition-colors">
-                                                    <i class="fa-brands fa-whatsapp"></i>
-                                                </a>
-                                            <?php endif; ?>
-                                        </div>
-                                    <?php else: ?>
-                                        <span class="text-slate-400 italic">-</span>
-                                    <?php endif; ?>
-                                </td>
-                                <td class="py-3 px-3 md:px-4 text-slate-600 dark:text-slate-300">
-                                    <?= !empty($row['suplayer_alamat']) ? htmlspecialchars($row['suplayer_alamat']) : '<span class="text-slate-400 italic">-</span>' ?>
-                                </td>
-                                <td class="py-3 px-3 md:px-4 text-center">
-                                    <?php if ($status == '1'): ?>
-                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                            Aktif
-                                        </span>
-                                    <?php else: ?>
-                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
-                                            Nonaktif
-                                        </span>
-                                    <?php endif; ?>
-                                </td>
-                                <td class="py-3 px-3 md:px-4 text-center">
-                                    <div class="flex items-center justify-center gap-1.5">
-                                        <a href="?main=suplayer&action=edit&id=<?= $row['suplayer_id'] ?>" class="w-7 h-7 rounded-lg bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900 border border-amber-200 dark:border-amber-800 flex items-center justify-center transition-colors text-xs" title="Edit Supplier">
-                                            <i class="fa-solid fa-pen-to-square"></i>
-                                        </a>
-                                        <form action="" method="post" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data supplier ini?');" class="inline-block m-0">
-                                            <input type="hidden" value="postdelete" name="action">
-                                            <input type="hidden" value="<?= $row['suplayer_id'] ?>" name="suplayer_id">
-                                            <button type="submit" class="w-7 h-7 rounded-lg bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900 border border-rose-200 dark:border-rose-800 flex items-center justify-center transition-colors text-xs" title="Hapus Supplier">
-                                                <i class="fa-solid fa-trash-can"></i>
-                                            </button>
-                                        </form>
-                                    </div>
+                    </thead>
+                    <tbody id="supplierTableBody" class="divide-y divide-slate-100 dark:divide-slate-800">
+                        <?php if (empty($viewlist)): ?>
+                            <tr>
+                                <td colspan="7" class="py-8 text-center text-slate-400 dark:text-slate-500">
+                                    <i class="fa-solid fa-truck text-2xl mb-2 block"></i>
+                                    Belum ada data supplier yang terdaftar
                                 </td>
                             </tr>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </tbody>
-            </table>
+                        <?php else: ?>
+                            <?php foreach ($viewlist as $row): 
+                                $status = $row['suplayer_status'];
+                                $hp = trim($row['suplayer_nomor']);
+                                $wa = preg_replace('/[^0-9]/', '', $hp);
+                                if (str_starts_with($wa, '0')) {
+                                    $wa = '62' . substr($wa, 1);
+                                }
+                            ?>
+                                <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors supplier-row" data-search="<?= strtolower(htmlspecialchars($row['suplayer_id'] . ' ' . $row['suplayer_nama'] . ' ' . $row['suplayer_nomor'] . ' ' . $row['suplayer_alamat'])) ?>">
+                                    <!-- Checkbox Item -->
+                                    <td class="py-3 px-3 text-center">
+                                        <input type="checkbox" name="suplayer_ids[]" value="<?= htmlspecialchars($row['suplayer_id']) ?>" class="supplier-checkbox w-4 h-4 rounded border-slate-300 text-rose-600 focus:ring-rose-500 cursor-pointer">
+                                    </td>
+                                    <td class="py-3 px-3 md:px-4 text-center font-mono font-bold text-slate-500 dark:text-slate-400">
+                                        #<?= htmlspecialchars($row['suplayer_id']) ?>
+                                    </td>
+                                    <td class="py-3 px-3 md:px-4">
+                                        <div class="font-bold text-slate-900 dark:text-white text-xs">
+                                            <?= htmlspecialchars($row['suplayer_nama']) ?>
+                                        </div>
+                                    </td>
+                                    <td class="py-3 px-3 md:px-4 font-mono">
+                                        <?php if (!empty($hp)): ?>
+                                            <div class="flex items-center gap-1.5">
+                                                <span><?= htmlspecialchars($hp) ?></span>
+                                                <?php if (!empty($wa)): ?>
+                                                    <a href="https://wa.me/<?= $wa ?>" target="_blank" title="Hubungi via WhatsApp" class="inline-flex items-center justify-center w-5 h-5 rounded bg-emerald-100 text-emerald-700 hover:bg-emerald-200 dark:bg-emerald-950/80 dark:text-emerald-400 text-[10px] transition-colors">
+                                                        <i class="fa-brands fa-whatsapp"></i>
+                                                    </a>
+                                                <?php endif; ?>
+                                            </div>
+                                        <?php else: ?>
+                                            <span class="text-slate-400 italic">-</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td class="py-3 px-3 md:px-4 text-slate-600 dark:text-slate-300">
+                                        <?= !empty($row['suplayer_alamat']) ? htmlspecialchars($row['suplayer_alamat']) : '<span class="text-slate-400 italic">-</span>' ?>
+                                    </td>
+                                    <td class="py-3 px-3 md:px-4 text-center">
+                                        <?php if ($status == '1'): ?>
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                                Aktif
+                                            </span>
+                                        <?php else: ?>
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                                                Nonaktif
+                                            </span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td class="py-3 px-3 md:px-4 text-center">
+                                        <div class="flex items-center justify-center gap-1.5">
+                                            <a href="?main=suplayer&action=edit&id=<?= $row['suplayer_id'] ?>" class="w-7 h-7 rounded-lg bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900 border border-amber-200 dark:border-amber-800 flex items-center justify-center transition-colors text-xs" title="Edit Supplier">
+                                                <i class="fa-solid fa-pen-to-square"></i>
+                                            </a>
+                                            <button type="button" onclick="singleDeleteSupplier('<?= $row['suplayer_id'] ?>', '<?= htmlspecialchars($row['suplayer_nama'], ENT_QUOTES) ?>')" class="w-7 h-7 rounded-lg bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900 border border-rose-200 dark:border-rose-800 flex items-center justify-center transition-colors text-xs" title="Hapus Supplier">
+                                                <i class="fa-solid fa-trash-can"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </div>
+
+        <!-- FLOATING BULK ACTION BAR -->
+        <div id="floatingSupplierBulkBar" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl border border-slate-700 flex items-center gap-4 animate-in fade-in slide-in-from-bottom-3 duration-200">
+            <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse"></span>
+                <span id="selectedSupplierCountText" class="text-xs font-bold text-slate-100">0 Supplier Terpilih</span>
+            </div>
+            <div class="h-4 w-px bg-slate-700"></div>
+            <div class="flex items-center gap-2">
+                <button type="submit" class="px-4 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-rose-600/30 active:scale-95 transition-all">
+                    <i class="fa-solid fa-trash-can text-xs"></i>
+                    <span>Hapus Supplier Terpilih</span>
+                </button>
+                <button type="button" onclick="clearSelectedSupplier()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition-colors">
+                    Batal
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <!-- FORM HAPUS SATUAN TERSIMPAN -->
+    <form id="formSingleDeleteSupplier" action="index.php?main=suplayer" method="post" style="display: none;">
+        <input type="hidden" name="action" value="postdelete">
+        <input type="hidden" name="suplayer_id" id="singleDeleteSupplierId" value="">
+    </form>
 
     <!-- PAGINATION CONTAINER -->
     <div id="suplayerPaginationContainer"></div>
@@ -156,7 +198,72 @@ document.addEventListener('DOMContentLoaded', () => {
             if (counter) counter.innerText = info.totalFiltered;
         }
     });
+
+    const checkAll = document.getElementById('checkAllSupplier');
+    const checkboxes = document.querySelectorAll('.supplier-checkbox');
+    const bulkBar = document.getElementById('floatingSupplierBulkBar');
+    const countText = document.getElementById('selectedSupplierCountText');
+
+    function updateBulkBar() {
+        const checked = document.querySelectorAll('.supplier-checkbox:checked');
+        if (checked.length > 0) {
+            countText.innerText = checked.length + ' Supplier Terpilih';
+            bulkBar.classList.remove('hidden');
+            bulkBar.classList.add('flex');
+        } else {
+            bulkBar.classList.add('hidden');
+            bulkBar.classList.remove('flex');
+            if (checkAll) checkAll.checked = false;
+        }
+    }
+
+    if (checkAll) {
+        checkAll.addEventListener('change', function() {
+            const visibleCheckboxes = document.querySelectorAll('.supplier-row:not([style*="display: none"]) .supplier-checkbox');
+            visibleCheckboxes.forEach(cb => {
+                cb.checked = checkAll.checked;
+            });
+            updateBulkBar();
+        });
+    }
+
+    checkboxes.forEach(cb => {
+        cb.addEventListener('change', updateBulkBar);
+    });
 });
+
+function clearSelectedSupplier() {
+    document.querySelectorAll('.supplier-checkbox').forEach(cb => cb.checked = false);
+    const checkAll = document.getElementById('checkAllSupplier');
+    if (checkAll) checkAll.checked = false;
+    const bulkBar = document.getElementById('floatingSupplierBulkBar');
+    if (bulkBar) {
+        bulkBar.classList.add('hidden');
+        bulkBar.classList.remove('flex');
+    }
+}
+
+function confirmBulkDeleteSupplier(e) {
+    const checked = document.querySelectorAll('.supplier-checkbox:checked');
+    if (checked.length === 0) {
+        alert('Silakan pilih minimal 1 supplier yang ingin dihapus.');
+        e.preventDefault();
+        return false;
+    }
+    const confirmed = confirm(`Apakah Anda yakin ingin menghapus ${checked.length} supplier yang dipilih secara permanen?`);
+    if (!confirmed) {
+        e.preventDefault();
+        return false;
+    }
+    return true;
+}
+
+function singleDeleteSupplier(supplierId, supplierName) {
+    if (confirm(`Apakah Anda yakin ingin menghapus supplier ${supplierName}?`)) {
+        document.getElementById('singleDeleteSupplierId').value = supplierId;
+        document.getElementById('formSingleDeleteSupplier').submit();
+    }
+}
 </script>
 
 <?php $content = ob_get_clean(); ?>

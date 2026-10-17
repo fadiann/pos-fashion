@@ -38,4 +38,17 @@ class SizeModel {
         $sql = "DELETE FROM tbl_size where size_id = '$size_id'";
         $this->db->query($sql);
     }
+    public function deleteMultipleSizes($size_ids){
+        if (empty($size_ids) || !is_array($size_ids)) {
+            return false;
+        }
+        $cleanIds = array_map('intval', $size_ids);
+        $cleanIds = array_filter($cleanIds, fn($id) => $id > 0);
+        if (empty($cleanIds)) {
+            return false;
+        }
+        $idList = implode(',', $cleanIds);
+        $sql = "DELETE FROM tbl_size WHERE size_id IN ($idList)";
+        return $this->db->query($sql);
+    }
 }
