@@ -69,9 +69,10 @@ if ($action === 'postsave_landing') {
     $landingConfig['tiktok']         = trim($Helpers->xss_clean(str_replace('@', '', $_POST['tiktok'] ?? '')));
 
     // Hapus Logo jika diminta
+    $rootDir = dirname(__DIR__, 3);
     if (isset($_POST['delete_logo']) && $_POST['delete_logo'] === '1') {
         if (!empty($landingConfig['logo'])) {
-            $oldFile = __DIR__ . '/../../' . strtok($landingConfig['logo'], '?');
+            $oldFile = $rootDir . '/' . strtok($landingConfig['logo'], '?');
             if (file_exists($oldFile) && strpos($oldFile, 'landing_logo_') !== false) {
                 @unlink($oldFile);
             }
@@ -91,7 +92,7 @@ if ($action === 'postsave_landing') {
             $decodedData = base64_decode($base64Data);
 
             if ($decodedData !== false) {
-                $targetDir = __DIR__ . '/../../app/assets/img';
+                $targetDir = $rootDir . '/app/assets/img';
                 if (!is_dir($targetDir)) {
                     @mkdir($targetDir, 0755, true);
                 }
@@ -101,7 +102,7 @@ if ($action === 'postsave_landing') {
 
                 // Hapus logo lama jika ada
                 if (!empty($landingConfig['logo'])) {
-                    $oldFile = __DIR__ . '/../../' . strtok($landingConfig['logo'], '?');
+                    $oldFile = $rootDir . '/' . strtok($landingConfig['logo'], '?');
                     if (file_exists($oldFile) && strpos($oldFile, 'landing_logo_') !== false) {
                         @unlink($oldFile);
                     }

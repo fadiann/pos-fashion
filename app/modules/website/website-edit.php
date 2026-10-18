@@ -278,7 +278,8 @@ $successType = $_GET['success'] ?? '';
 
                         <!-- Preview Area & Kontrol Upload -->
                         <?php 
-                        $hasExistingLogo = !empty($landingConfig['logo']) && file_exists(__DIR__ . '/../../' . strtok($landingConfig['logo'], '?'));
+                        $rootDir = dirname(__DIR__, 3);
+                        $hasExistingLogo = !empty($landingConfig['logo']) && file_exists($rootDir . '/' . strtok($landingConfig['logo'], '?'));
                         $existingLogoUrl = $hasExistingLogo ? htmlspecialchars($landingConfig['logo']) : '';
                         ?>
                         <div class="flex flex-col sm:flex-row items-center gap-4 sm:gap-5 p-4 rounded-xl bg-slate-50/70 dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800">
