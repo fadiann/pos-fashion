@@ -3,6 +3,10 @@ $currentTab = $_GET['tab'] ?? 'receipt';
 $successType = $_GET['success'] ?? '';
 ?>
 
+<!-- Cropper.js for Flexible Logo Cropping -->
+<link rel="stylesheet" href="app/assets/css/cropper.min.css">
+<script src="app/assets/js/cropper.min.js"></script>
+
 <div class="space-y-4 pb-12">
     <!-- ALERT NOTIFIKASI SUKSES -->
     <?php if ($successType === 'receipt'): ?>
@@ -252,6 +256,90 @@ $successType = $_GET['success'] ?? '';
                 <!-- KOLOM KIRI: FORM PENGATURAN BIO & LINKS DINAMIS -->
                 <div class="lg:col-span-7 space-y-4">
                     
+                    <!-- KARTU LOGO: ATUR LOGO & FOTO PROFIL LANDING PAGE -->
+                    <div class="bg-white dark:bg-slate-900 rounded-xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4">
+                        <div class="border-b border-slate-100 dark:border-slate-800 pb-3 flex flex-wrap items-center justify-between gap-2">
+                            <div>
+                                <h3 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                    <i class="fa-solid fa-image text-teal-600"></i>
+                                    <span>Logo Brand & Foto Profil</span>
+                                </h3>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">Atur logo toko untuk ditampilkan pada header dan avatar landing page</p>
+                            </div>
+                            <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-teal-50 dark:bg-teal-950/80 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-800 flex items-center gap-1">
+                                <i class="fa-solid fa-crop-simple text-[9px]"></i>
+                                <span>Crop Fleksibel & 1:1</span>
+                            </span>
+                        </div>
+
+                        <!-- Hidden Inputs untuk Data Crop & Status Hapus -->
+                        <input type="hidden" name="logo_base64" id="landingLogoBase64" value="">
+                        <input type="hidden" name="delete_logo" id="deleteLogoInput" value="0">
+
+                        <!-- Preview Area & Kontrol Upload -->
+                        <?php 
+                        $hasExistingLogo = !empty($landingConfig['logo']) && file_exists(__DIR__ . '/../../' . strtok($landingConfig['logo'], '?'));
+                        $existingLogoUrl = $hasExistingLogo ? htmlspecialchars($landingConfig['logo']) : '';
+                        ?>
+                        <div class="flex flex-col sm:flex-row items-center gap-4 sm:gap-5 p-4 rounded-xl bg-slate-50/70 dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800">
+                            <!-- Avatar Preview Circle -->
+                            <div class="relative shrink-0">
+                                <div class="w-20 h-20 rounded-full p-1 bg-gradient-to-tr from-teal-500 via-indigo-500 to-rose-500 shadow-md">
+                                    <div id="logoPreviewContainer" class="w-full h-full rounded-full bg-slate-900 border-2 border-white dark:border-slate-900 flex items-center justify-center overflow-hidden relative">
+                                        <img id="logoPreviewImg" src="<?= $existingLogoUrl ?>" alt="Logo Preview" class="w-full h-full object-cover <?= $hasExistingLogo ? '' : 'hidden' ?>" onerror="this.classList.add('hidden'); document.getElementById('logoPreviewPlaceholder').classList.remove('hidden');">
+                                        <div id="logoPreviewPlaceholder" class="flex flex-col items-center justify-center text-teal-400 <?= $hasExistingLogo ? 'hidden' : '' ?>">
+                                            <i class="fa-solid fa-shop text-2xl"></i>
+                                            <span class="text-[7.5px] text-slate-400 mt-0.5 uppercase tracking-wider">Default</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <span id="logoStatusBadge" class="hidden absolute -bottom-1 -right-1 px-1.5 py-0.5 rounded-full text-[8.5px] font-extrabold bg-emerald-500 text-white shadow border border-white dark:border-slate-900">
+                                    Baru
+                                </span>
+                            </div>
+
+                            <!-- Controls & Information -->
+                            <div class="flex-1 text-center sm:text-left space-y-2">
+                                <div>
+                                    <h4 class="text-xs font-bold text-slate-900 dark:text-white" id="logoTitleText">
+                                        <?= $hasExistingLogo ? 'Logo Kustom Aktif' : 'Belum Ada Logo Kustom' ?>
+                                    </h4>
+                                    <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                                        Upload gambar format PNG, JPG, atau WEBP. Fitur crop fleksibel memungkinkan Anda menyesuaikan bingkai persegi (1:1), memutar, zoom, atau bebas tanpa distorsi.
+                                    </p>
+                                </div>
+
+                                <div class="flex flex-wrap items-center gap-2 pt-1 justify-center sm:justify-start">
+                                    <!-- File Input Hidden -->
+                                    <input type="file" id="logoFileInput" accept="image/png, image/jpeg, image/webp, image/gif" class="hidden">
+                                    
+                                    <!-- Upload & Crop Button -->
+                                    <button type="button" onclick="document.getElementById('logoFileInput').click()" class="px-3.5 py-2 rounded-lg bg-teal-600 hover:bg-teal-700 active:scale-95 text-white text-xs font-bold shadow-sm shadow-teal-600/20 flex items-center gap-1.5 transition-all">
+                                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                                        <span id="btnUploadText"><?= $hasExistingLogo ? 'Ganti / Upload Logo' : 'Upload & Crop Gambar' ?></span>
+                                    </button>
+
+                                    <!-- Recrop Button -->
+                                    <button type="button" id="btnRecropLogo" onclick="recropCurrentLogo()" class="px-3 py-2 rounded-lg bg-slate-200 hover:bg-slate-300 dark:bg-slate-750 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold flex items-center gap-1.5 transition-all <?= $hasExistingLogo ? '' : 'hidden' ?>">
+                                        <i class="fa-solid fa-crop-simple"></i>
+                                        <span>Sesuaikan Ulang</span>
+                                    </button>
+
+                                    <!-- Delete Button -->
+                                    <button type="button" id="btnDeleteLogo" onclick="deleteCurrentLogo()" class="px-3 py-2 rounded-lg bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/40 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800 text-xs font-semibold flex items-center gap-1.5 transition-all <?= $hasExistingLogo ? '' : 'hidden' ?>">
+                                        <i class="fa-solid fa-trash-can"></i>
+                                        <span>Hapus Logo</span>
+                                    </button>
+                                </div>
+
+                                <div id="logoNoticeMsg" class="hidden text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1 pt-0.5">
+                                    <i class="fa-solid fa-circle-check"></i>
+                                    <span>Logo baru siap disimpan! Klik tombol "Simpan Pengaturan Landing Page" di bawah untuk menerapkan.</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- KARTU 1: PROFIL & BIO UTAMA -->
                     <div class="bg-white dark:bg-slate-900 rounded-xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4">
                         <div class="border-b border-slate-100 dark:border-slate-800 pb-3">
@@ -481,8 +569,9 @@ $successType = $_GET['success'] ?? '';
                                 
                                 <!-- Screen Header & Avatar -->
                                 <div class="w-14 h-14 rounded-full p-0.5 bg-gradient-to-tr from-teal-500 to-indigo-500 shadow-md mb-2">
-                                    <div class="w-full h-full rounded-full bg-slate-950 flex items-center justify-center text-teal-400 text-lg">
-                                        <i class="fa-solid fa-shop"></i>
+                                    <div id="phonePrevAvatarContainer" class="w-full h-full rounded-full bg-slate-950 flex items-center justify-center text-teal-400 text-lg overflow-hidden">
+                                        <img id="phonePrevLogoImg" src="<?= $existingLogoUrl ?>" alt="Logo" class="w-full h-full object-cover <?= $hasExistingLogo ? '' : 'hidden' ?>" onerror="this.classList.add('hidden'); document.getElementById('phonePrevDefaultIcon').classList.remove('hidden');">
+                                        <i id="phonePrevDefaultIcon" class="fa-solid fa-shop <?= $hasExistingLogo ? 'hidden' : '' ?>"></i>
                                     </div>
                                 </div>
 
@@ -596,6 +685,126 @@ $successType = $_GET['success'] ?? '';
         </div>
     </div>
 </template>
+
+<!-- ========================================== -->
+<!-- MODAL CROP GAMBAR LOGO                    -->
+<!-- ========================================== -->
+<div id="cropModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="cropModalTitle" role="dialog" aria-modal="true">
+    <!-- Backdrop Blur -->
+    <div class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm transition-opacity" onclick="closeCropModal()"></div>
+
+    <div class="flex min-h-screen items-center justify-center p-3 sm:p-4">
+        <div class="relative w-full max-w-2xl rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden transition-all flex flex-col max-h-[92vh]">
+            
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between px-5 py-3.5 border-b border-slate-100 dark:border-slate-800">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-lg bg-teal-50 dark:bg-teal-950/60 text-teal-600 dark:text-teal-400 flex items-center justify-center text-sm font-bold">
+                        <i class="fa-solid fa-crop-simple"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-900 dark:text-white" id="cropModalTitle">Sesuaikan & Potong Logo Landing Page</h3>
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400">Atur bingkai, rasio crop, putar atau zoom agar pas dan proporsional</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeCropModal()" class="w-8 h-8 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center transition-colors">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body (Cropper View & Controls) -->
+            <div class="p-4 sm:p-5 overflow-y-auto space-y-4">
+                
+                <!-- Cropper Image Container -->
+                <div class="w-full bg-slate-950 rounded-xl overflow-hidden border border-slate-800 flex items-center justify-center relative min-h-[280px] max-h-[380px]">
+                    <img id="cropperImage" src="" alt="Source Image" class="max-w-full block" style="display: block; max-height: 380px;">
+                </div>
+
+                <!-- Aspect Ratio & Transform Toolbar -->
+                <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
+                    
+                    <!-- Aspect Ratio Switcher Buttons -->
+                    <div class="sm:col-span-7 flex flex-wrap items-center gap-1.5">
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mr-1">Rasio:</span>
+                        <button type="button" onclick="setCropRatio(1, this)" class="crop-ratio-btn px-2.5 py-1 rounded-md text-[11px] font-bold bg-teal-600 text-white shadow-sm transition-all" data-ratio="1">
+                            1:1 (Persegi/Bulat)
+                        </button>
+                        <button type="button" onclick="setCropRatio(NaN, this)" class="crop-ratio-btn px-2.5 py-1 rounded-md text-[11px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all" data-ratio="free">
+                            Bebas (Fleksibel)
+                        </button>
+                        <button type="button" onclick="setCropRatio(4/3, this)" class="crop-ratio-btn px-2.5 py-1 rounded-md text-[11px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all" data-ratio="4/3">
+                            4:3
+                        </button>
+                        <button type="button" onclick="setCropRatio(16/9, this)" class="crop-ratio-btn px-2.5 py-1 rounded-md text-[11px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all" data-ratio="16/9">
+                            16:9
+                        </button>
+                    </div>
+
+                    <!-- Transform Tools (Zoom, Rotate, Flip, Reset) -->
+                    <div class="sm:col-span-5 flex items-center justify-end gap-1">
+                        <button type="button" onclick="zoomCropper(0.1)" title="Perbesar (+)" class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 flex items-center justify-center text-xs transition-colors">
+                            <i class="fa-solid fa-magnifying-glass-plus"></i>
+                        </button>
+                        <button type="button" onclick="zoomCropper(-0.1)" title="Perkecil (-)" class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 flex items-center justify-center text-xs transition-colors">
+                            <i class="fa-solid fa-magnifying-glass-minus"></i>
+                        </button>
+                        <button type="button" onclick="rotateCropper(-90)" title="Putar Kiri 90°" class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 flex items-center justify-center text-xs transition-colors">
+                            <i class="fa-solid fa-rotate-left"></i>
+                        </button>
+                        <button type="button" onclick="rotateCropper(90)" title="Putar Kanan 90°" class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 flex items-center justify-center text-xs transition-colors">
+                            <i class="fa-solid fa-rotate-right"></i>
+                        </button>
+                        <button type="button" onclick="flipCropper()" title="Balik Horizontal" class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 flex items-center justify-center text-xs transition-colors">
+                            <i class="fa-solid fa-arrows-left-right"></i>
+                        </button>
+                        <button type="button" onclick="resetCropper()" title="Kembalikan Posisi Semula" class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 flex items-center justify-center text-xs transition-colors">
+                            <i class="fa-solid fa-arrow-rotate-right"></i>
+                        </button>
+                    </div>
+
+                </div>
+
+                <!-- Live Circular & Square Preview Box -->
+                <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+                    <div class="flex items-center gap-3">
+                        <!-- Round Preview -->
+                        <div class="flex flex-col items-center">
+                            <div class="w-14 h-14 rounded-full overflow-hidden border-2 border-teal-500 bg-slate-900 crop-preview-box"></div>
+                            <span class="text-[9px] font-bold text-slate-400 mt-1">Avatar</span>
+                        </div>
+                        <!-- Square Preview -->
+                        <div class="flex flex-col items-center">
+                            <div class="w-14 h-14 rounded-xl overflow-hidden border-2 border-slate-400 dark:border-slate-600 bg-slate-900 crop-preview-box"></div>
+                            <span class="text-[9px] font-bold text-slate-400 mt-1">Kotak</span>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-[11px] font-bold text-slate-700 dark:text-slate-300">Pratinjau Hasil Potong</div>
+                        <div class="text-[10px] text-teal-600 dark:text-teal-400 font-mono font-semibold" id="cropResolutionInfo">Menyesuaikan...</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="px-5 py-3 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-850/50 flex flex-wrap items-center justify-between gap-2">
+                <button type="button" onclick="closeCropModal()" class="px-4 py-2 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs border border-slate-300 dark:border-slate-700 transition-colors">
+                    Batal
+                </button>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="applyFullImage()" title="Gunakan gambar penuh tanpa pemotongan" class="px-3.5 py-2 rounded-lg bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 font-semibold text-xs transition-colors">
+                        Gunakan Ukuran Utuh
+                    </button>
+                    <button type="button" onclick="applyCrop()" class="px-5 py-2 rounded-lg bg-teal-600 hover:bg-teal-700 active:scale-95 text-white font-bold text-xs shadow-md shadow-teal-600/20 flex items-center gap-1.5 transition-all">
+                        <i class="fa-solid fa-check"></i>
+                        <span>Terapkan Crop & Pakai Logo</span>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
 
 <script>
 // Switch between Tab 1 (Receipt) and Tab 2 (Landing Page)
@@ -770,9 +979,258 @@ document.addEventListener('DOMContentLoaded', () => {
         formLanding.addEventListener('change', updatePhoneMockup);
     }
 
+    // Listener untuk File Input Gambar Logo
+    const logoFileInput = document.getElementById('logoFileInput');
+    if (logoFileInput) {
+        logoFileInput.addEventListener('change', function(e) {
+            const file = e.target.files && e.target.files[0];
+            if (!file) return;
+
+            if (!file.type.match(/^image\//)) {
+                alert('File yang dipilih harus berupa gambar (JPG, PNG, WEBP, GIF).');
+                logoFileInput.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                openCropModal(evt.target.result);
+                logoFileInput.value = ''; // Reset agar bisa pilih gambar yang sama lagi
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    // Keyboard ESC to close modal
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            const modal = document.getElementById('cropModal');
+            if (modal && !modal.classList.contains('hidden')) {
+                closeCropModal();
+            }
+        }
+    });
+
     // Initial render of phone mockup
     updatePhoneMockup();
 });
+
+// ==========================================
+// CROPPER.JS & LOGO MANAGEMENT FUNCTIONS
+// ==========================================
+let cropperInstance = null;
+let currentFlipX = 1;
+let currentRawSource = '';
+
+function openCropModal(imgSrc) {
+    const modal = document.getElementById('cropModal');
+    const imageEl = document.getElementById('cropperImage');
+    if (!modal || !imageEl) return;
+
+    currentRawSource = imgSrc;
+    imageEl.src = imgSrc;
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+
+    if (cropperInstance) {
+        cropperInstance.destroy();
+        cropperInstance = null;
+    }
+    currentFlipX = 1;
+
+    // Reset tombol rasio ke default 1:1
+    document.querySelectorAll('.crop-ratio-btn').forEach(b => {
+        b.className = 'crop-ratio-btn px-2.5 py-1 rounded-md text-[11px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all';
+        if (b.getAttribute('data-ratio') === '1') {
+            b.className = 'crop-ratio-btn px-2.5 py-1 rounded-md text-[11px] font-bold bg-teal-600 text-white shadow-sm transition-all';
+        }
+    });
+
+    // Inisialisasi Cropper setelah modal tampil di DOM
+    setTimeout(() => {
+        if (typeof Cropper === 'undefined') {
+            alert('Modul pemotong gambar sedang dimuat, silakan tunggu sesaat.');
+            return;
+        }
+
+        cropperInstance = new Cropper(imageEl, {
+            aspectRatio: 1, // Default 1:1 untuk icon/avatar
+            viewMode: 1,
+            dragMode: 'move',
+            autoCropArea: 0.9,
+            restore: false,
+            guides: true,
+            center: true,
+            highlight: true,
+            cropBoxMovable: true,
+            cropBoxResizable: true,
+            toggleDragModeOnDblclick: false,
+            preview: '.crop-preview-box',
+            crop: function(e) {
+                const info = document.getElementById('cropResolutionInfo');
+                if (info) {
+                    info.innerText = Math.round(e.detail.width) + ' × ' + Math.round(e.detail.height) + ' px';
+                }
+            }
+        });
+    }, 150);
+}
+
+function closeCropModal() {
+    const modal = document.getElementById('cropModal');
+    if (modal) modal.classList.add('hidden');
+    document.body.style.overflow = '';
+    if (cropperInstance) {
+        cropperInstance.destroy();
+        cropperInstance = null;
+    }
+}
+
+function setCropRatio(ratio, btn) {
+    if (!cropperInstance) return;
+    cropperInstance.setAspectRatio(ratio);
+
+    document.querySelectorAll('.crop-ratio-btn').forEach(b => {
+        b.className = 'crop-ratio-btn px-2.5 py-1 rounded-md text-[11px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all';
+    });
+    if (btn) {
+        btn.className = 'crop-ratio-btn px-2.5 py-1 rounded-md text-[11px] font-bold bg-teal-600 text-white shadow-sm transition-all';
+    }
+}
+
+function zoomCropper(delta) {
+    if (cropperInstance) cropperInstance.zoom(delta);
+}
+
+function rotateCropper(degree) {
+    if (cropperInstance) cropperInstance.rotate(degree);
+}
+
+function flipCropper() {
+    if (!cropperInstance) return;
+    currentFlipX = -currentFlipX;
+    cropperInstance.scaleX(currentFlipX);
+}
+
+function resetCropper() {
+    if (cropperInstance) {
+        cropperInstance.reset();
+        currentFlipX = 1;
+    }
+}
+
+function applyCrop() {
+    if (!cropperInstance) return;
+    const canvas = cropperInstance.getCroppedCanvas({
+        maxWidth: 1024,
+        maxHeight: 1024,
+        fillColor: '#ffffff00',
+        imageSmoothingEnabled: true,
+        imageSmoothingQuality: 'high'
+    });
+
+    if (!canvas) {
+        alert('Gagal memproses crop gambar. Silakan coba kembali.');
+        return;
+    }
+
+    const base64 = canvas.toDataURL('image/png');
+    setFinalLogo(base64);
+    closeCropModal();
+}
+
+function applyFullImage() {
+    if (!currentRawSource) return;
+    setFinalLogo(currentRawSource);
+    closeCropModal();
+}
+
+function setFinalLogo(base64Data) {
+    document.getElementById('landingLogoBase64').value = base64Data;
+    document.getElementById('deleteLogoInput').value = '0';
+
+    const previewImg = document.getElementById('logoPreviewImg');
+    const placeholder = document.getElementById('logoPreviewPlaceholder');
+    const statusBadge = document.getElementById('logoStatusBadge');
+    const noticeMsg = document.getElementById('logoNoticeMsg');
+    const btnRecrop = document.getElementById('btnRecropLogo');
+    const btnDelete = document.getElementById('btnDeleteLogo');
+    const btnUploadText = document.getElementById('btnUploadText');
+    const titleText = document.getElementById('logoTitleText');
+
+    if (previewImg) {
+        previewImg.src = base64Data;
+        previewImg.classList.remove('hidden');
+    }
+    if (placeholder) placeholder.classList.add('hidden');
+    if (statusBadge) statusBadge.classList.remove('hidden');
+    if (noticeMsg) {
+        noticeMsg.innerHTML = '<i class="fa-solid fa-circle-check"></i> <span>Logo baru siap disimpan! Klik tombol "Simpan Pengaturan Landing Page" di bawah untuk menerapkan.</span>';
+        noticeMsg.classList.remove('hidden');
+    }
+    if (btnRecrop) btnRecrop.classList.remove('hidden');
+    if (btnDelete) btnDelete.classList.remove('hidden');
+    if (btnUploadText) btnUploadText.innerText = 'Ganti Gambar Logo';
+    if (titleText) titleText.innerText = 'Logo Baru (Belum Disimpan)';
+
+    // Update avatar di Smartphone Mockup secara instan
+    const phoneLogo = document.getElementById('phonePrevLogoImg');
+    const phoneDefault = document.getElementById('phonePrevDefaultIcon');
+    if (phoneLogo) {
+        phoneLogo.src = base64Data;
+        phoneLogo.classList.remove('hidden');
+    }
+    if (phoneDefault) phoneDefault.classList.add('hidden');
+}
+
+function recropCurrentLogo() {
+    const previewImg = document.getElementById('logoPreviewImg');
+    if (previewImg && previewImg.src && !previewImg.classList.contains('hidden')) {
+        openCropModal(previewImg.src);
+    }
+}
+
+function deleteCurrentLogo() {
+    if (!confirm('Apakah Anda yakin ingin menghapus logo kustom dan kembali ke icon toko default?')) {
+        return;
+    }
+
+    document.getElementById('landingLogoBase64').value = '';
+    document.getElementById('deleteLogoInput').value = '1';
+
+    const previewImg = document.getElementById('logoPreviewImg');
+    const placeholder = document.getElementById('logoPreviewPlaceholder');
+    const statusBadge = document.getElementById('logoStatusBadge');
+    const noticeMsg = document.getElementById('logoNoticeMsg');
+    const btnRecrop = document.getElementById('btnRecropLogo');
+    const btnDelete = document.getElementById('btnDeleteLogo');
+    const btnUploadText = document.getElementById('btnUploadText');
+    const titleText = document.getElementById('logoTitleText');
+
+    if (previewImg) {
+        previewImg.src = '';
+        previewImg.classList.add('hidden');
+    }
+    if (placeholder) placeholder.classList.remove('hidden');
+    if (statusBadge) statusBadge.classList.add('hidden');
+    if (noticeMsg) {
+        noticeMsg.innerHTML = '<i class="fa-solid fa-circle-info text-amber-500"></i> <span class="text-amber-600 dark:text-amber-400">Logo akan dihapus setelah Anda menekan tombol "Simpan Pengaturan Landing Page".</span>';
+        noticeMsg.classList.remove('hidden');
+    }
+    if (btnRecrop) btnRecrop.classList.add('hidden');
+    if (btnDelete) btnDelete.classList.add('hidden');
+    if (btnUploadText) btnUploadText.innerText = 'Upload & Crop Gambar';
+    if (titleText) titleText.innerText = 'Belum Ada Logo Kustom';
+
+    // Update avatar di Smartphone Mockup ke default
+    const phoneLogo = document.getElementById('phonePrevLogoImg');
+    const phoneDefault = document.getElementById('phonePrevDefaultIcon');
+    if (phoneLogo) {
+        phoneLogo.src = '';
+        phoneLogo.classList.add('hidden');
+    }
+    if (phoneDefault) phoneDefault.classList.remove('hidden');
+}
 </script>
 
 <?php $content = ob_get_clean(); ?>

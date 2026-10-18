@@ -23,6 +23,7 @@ $defaultLandingConfig = [
     'instagram'      => 'bakulsepatusolo',
     'tiktok'         => 'bakulsepatusolo',
     'whatsapp_utama' => '0812-3456-7890',
+    'logo'           => '',
     'links'          => []
 ];
 
@@ -66,6 +67,52 @@ if ($action === 'postsave_landing') {
     $landingConfig['whatsapp_utama'] = trim($Helpers->xss_clean($_POST['whatsapp_utama'] ?? ''));
     $landingConfig['instagram']      = trim($Helpers->xss_clean(str_replace('@', '', $_POST['instagram'] ?? '')));
     $landingConfig['tiktok']         = trim($Helpers->xss_clean(str_replace('@', '', $_POST['tiktok'] ?? '')));
+
+    // Hapus Logo jika diminta
+    if (isset($_POST['delete_logo']) && $_POST['delete_logo'] === '1') {
+        if (!empty($landingConfig['logo'])) {
+            $oldFile = __DIR__ . '/../../' . strtok($landingConfig['logo'], '?');
+            if (file_exists($oldFile) && strpos($oldFile, 'landing_logo_') !== false) {
+                @unlink($oldFile);
+            }
+        }
+        $landingConfig['logo'] = '';
+    }
+
+    // Simpan gambar logo baru jika diunggah via Cropper (Base64)
+    if (!empty($_POST['logo_base64'])) {
+        $rawBase64 = $_POST['logo_base64'];
+        if (preg_match('/^data:image\/(\w+);base64,/', $rawBase64, $typeMatch)) {
+            $imageType = strtolower($typeMatch[1]);
+            if (!in_array($imageType, ['jpg', 'jpeg', 'png', 'webp', 'gif'])) {
+                $imageType = 'png';
+            }
+            $base64Data = substr($rawBase64, strpos($rawBase64, ',') + 1);
+            $decodedData = base64_decode($base64Data);
+
+            if ($decodedData !== false) {
+                $targetDir = __DIR__ . '/../../app/assets/img';
+                if (!is_dir($targetDir)) {
+                    @mkdir($targetDir, 0755, true);
+                }
+
+                $filename = 'landing_logo_' . time() . '.' . ($imageType === 'jpeg' ? 'jpg' : $imageType);
+                $targetFile = $targetDir . '/' . $filename;
+
+                // Hapus logo lama jika ada
+                if (!empty($landingConfig['logo'])) {
+                    $oldFile = __DIR__ . '/../../' . strtok($landingConfig['logo'], '?');
+                    if (file_exists($oldFile) && strpos($oldFile, 'landing_logo_') !== false) {
+                        @unlink($oldFile);
+                    }
+                }
+
+                if (file_put_contents($targetFile, $decodedData)) {
+                    $landingConfig['logo'] = 'app/assets/img/' . $filename;
+                }
+            }
+        }
+    }
 
     // Susun array links dari input dinamis
     $links = [];

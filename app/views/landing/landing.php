@@ -12,6 +12,7 @@ $defaultLanding = [
     'instagram'      => 'bakulsepatusolo',
     'tiktok'         => 'bakulsepatusolo',
     'whatsapp_utama' => '0812-3456-7890',
+    'logo'           => '',
     'links'          => []
 ];
 
@@ -138,9 +139,16 @@ $colorStyles = [
         <div class="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
             <!-- Brand Logo Link -->
             <a href="index.php" class="flex items-center gap-2 group">
-                <div class="w-7 h-7 rounded-lg bg-teal-600 dark:bg-teal-500 flex items-center justify-center text-white shadow-sm font-bold text-xs group-hover:scale-105 transition-transform">
-                    <i class="fa-solid fa-bag-shopping"></i>
-                </div>
+                <?php if (!empty($landingData['logo'])): ?>
+                    <img src="<?= htmlspecialchars($landingData['logo']) ?>" alt="Logo" class="w-7 h-7 rounded-lg object-cover shadow-sm group-hover:scale-105 transition-transform border border-slate-200 dark:border-slate-700" onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');">
+                    <div class="hidden w-7 h-7 rounded-lg bg-teal-600 dark:bg-teal-500 flex items-center justify-center text-white shadow-sm font-bold text-xs group-hover:scale-105 transition-transform">
+                        <i class="fa-solid fa-bag-shopping"></i>
+                    </div>
+                <?php else: ?>
+                    <div class="w-7 h-7 rounded-lg bg-teal-600 dark:bg-teal-500 flex items-center justify-center text-white shadow-sm font-bold text-xs group-hover:scale-105 transition-transform">
+                        <i class="fa-solid fa-bag-shopping"></i>
+                    </div>
+                <?php endif; ?>
                 <span class="font-extrabold text-sm tracking-tight text-slate-900 dark:text-white group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">
                     <?= htmlspecialchars($landingData['title']) ?>
                 </span>
@@ -166,10 +174,17 @@ $colorStyles = [
             <div class="relative mb-2.5 group">
                 <div class="w-20 h-20 rounded-full p-1 bg-gradient-to-tr from-teal-500 via-indigo-500 to-rose-500 shadow-xl shadow-teal-500/10 group-hover:scale-105 transition-transform duration-300">
                     <div class="w-full h-full rounded-full bg-slate-900 border-2 border-white dark:border-slate-900 flex items-center justify-center overflow-hidden">
-                        <!-- Use custom icon / logo -->
-                        <div class="text-2xl text-teal-400">
-                            <i class="fa-solid fa-shop"></i>
-                        </div>
+                        <?php if (!empty($landingData['logo'])): ?>
+                            <img src="<?= htmlspecialchars($landingData['logo']) ?>" alt="<?= htmlspecialchars($landingData['title']) ?>" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');">
+                            <div class="hidden text-2xl text-teal-400">
+                                <i class="fa-solid fa-shop"></i>
+                            </div>
+                        <?php else: ?>
+                            <!-- Use custom icon / logo -->
+                            <div class="text-2xl text-teal-400">
+                                <i class="fa-solid fa-shop"></i>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>
                 <!-- Verified Badge -->
