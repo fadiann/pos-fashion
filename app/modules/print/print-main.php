@@ -390,7 +390,7 @@ $isDefault80 = ($storeConfig['lebar_kertas_default'] === '80mm');
         // Web Bluetooth Print Function
         async function printThermalBluetooth() {
             if (!navigator.bluetooth) {
-                alert("Browser ini belum mendukung Web Bluetooth API. Silakan gunakan Google Chrome di Tablet Android atau gunakan tombol 'Print Standar'.");
+                alert("Browser ini belum mendukung Web Bluetooth API. Silakan gunakan Google Chrome di Tablet Android atau PC yang memiliki koneksi Bluetooth, atau gunakan tombol 'Print Standar'.");
                 window.print();
                 return;
             }
@@ -400,59 +400,88 @@ $isDefault80 = ($storeConfig['lebar_kertas_default'] === '80mm');
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menghubungkan...';
             btn.disabled = true;
 
+            let device = null;
             try {
-                // Request Bluetooth Device dengan service umum thermal printer
-                const device = await navigator.bluetooth.requestDevice({
-                    filters: [
-                        { namePrefix: 'MTP' },
-                        { namePrefix: 'RPP' },
-                        { namePrefix: 'Printer' },
-                        { namePrefix: 'POS' },
-                        { namePrefix: 'BlueTooth' },
-                        { namePrefix: 'InnerPrinter' },
-                        { namePrefix: 'PT-' }
-                    ],
-                    optionalServices: [
-                        '000018f0-0000-1000-8000-00805f9b34fb', // Standard Printer Service
-                        'e7810a71-73ae-499d-8c15-faa9aef0c3f2',
-                        '49535343-fe7d-4ae5-8fa9-9fafd205e455'
-                    ],
-                    acceptAllDevices: true
+                // Daftar UUID service printer thermal BLE yang umum digunakan
+                const thermalPrinterServices = [
+                    '000018f0-0000-1000-8000-00805f9b34fb', // Standard Printer Service (0x18F0)
+                    'e7810a71-73ae-499d-8c15-faa9aef0c3f2', // Pos-58 / Goojprt / MPT / PT-210
+                    '49535343-fe7d-4ae5-8fa9-9fafd205e455', // ISSC transparent UART
+                    '6e400001-b5a3-f393-e0a9-e50e24dcca9e', // Nordic UART Service
+                    '0000ae00-0000-1000-8000-00805f9b34fb', // Custom thermal printer AE00
+                    '0000ae30-0000-1000-8000-00805f9b34fb', // Custom thermal printer AE30
+                    '0000ff00-0000-1000-8000-00805f9b34fb', // Custom thermal printer FF00
+                    '0000fee7-0000-1000-8000-00805f9b34fb', // IoT thermal printer FEE7
+                    '000018f1-0000-1000-8000-00805f9b34fb',
+                    '0000fff0-0000-1000-8000-00805f9b34fb'  // FFF0 Custom Service
+                ];
+
+                // Request Bluetooth Device (Gunakan acceptAllDevices tanpa filters agar tidak terjadi error bentrok)
+                device = await navigator.bluetooth.requestDevice({
+                    acceptAllDevices: true,
+                    optionalServices: thermalPrinterServices
                 });
 
+                if (!device.gatt) {
+                    throw new Error("Perangkat tidak mendukung koneksi Bluetooth GATT.");
+                }
+
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyambungkan Printer...';
                 const server = await device.gatt.connect();
-                
-                // Cari service printer
-                let printerService = null;
-                const services = await server.getPrimaryServices();
-                for (let s of services) {
-                    printerService = s;
-                    break;
-                }
 
-                if (!printerService) {
-                    throw new Error("Service printer tidak ditemukan pada perangkat Bluetooth ini.");
-                }
-
-                // Cari writable characteristic
-                const characteristics = await printerService.getCharacteristics();
                 let writeChar = null;
-                for (let c of characteristics) {
-                    if (c.properties.write || c.properties.writeWithoutResponse) {
-                        writeChar = c;
-                        break;
+
+                // 1. Coba iterasi semua primary services yang diizinkan untuk mencari karakteristik writable
+                try {
+                    const services = await server.getPrimaryServices();
+                    for (const s of services) {
+                        try {
+                            const characteristics = await s.getCharacteristics();
+                            for (const c of characteristics) {
+                                if (c.properties.write || c.properties.writeWithoutResponse) {
+                                    writeChar = c;
+                                    break;
+                                }
+                            }
+                            if (writeChar) break;
+                        } catch (charErr) {
+                            // Abaikan dan coba service berikutnya
+                        }
+                    }
+                } catch (servErr) {
+                    console.warn("getPrimaryServices multi-scan dilewati:", servErr);
+                }
+
+                // 2. Jika belum ditemukan, lakukan pengecekan langsung ke UUID service printer umum satu per satu
+                if (!writeChar) {
+                    for (const uuid of thermalPrinterServices) {
+                        try {
+                            const s = await server.getPrimaryService(uuid);
+                            const characteristics = await s.getCharacteristics();
+                            for (const c of characteristics) {
+                                if (c.properties.write || c.properties.writeWithoutResponse) {
+                                    writeChar = c;
+                                    break;
+                                }
+                            }
+                            if (writeChar) break;
+                        } catch (e) {
+                            // Service ini tidak ada di printer tersebut, lanjutkan
+                        }
                     }
                 }
 
                 if (!writeChar) {
-                    throw new Error("Karakteristik cetak tidak ditemukan.");
+                    throw new Error("Karakteristik cetak tidak ditemukan pada printer ini. Pastikan printer Bluetooth mendukung mode BLE (Bluetooth Low Energy).");
                 }
+
+                btn.innerHTML = '<i class="fa-solid fa-print fa-bounce"></i> Mencetak Struk...';
 
                 // Generate bytes ESC/POS
                 const is80 = document.getElementById('receipt-paper').classList.contains('receipt-80mm');
                 const rawData = buildEscPosData(receiptData, is80);
 
-                // Kirim byte data per chunk (maksimal 512 byte per paket BLE)
+                // Kirim byte data per chunk dengan jeda kecil agar buffer printer tidak overflow
                 const chunkSize = 100;
                 for (let i = 0; i < rawData.length; i += chunkSize) {
                     const chunk = rawData.slice(i, i + chunkSize);
@@ -461,15 +490,27 @@ $isDefault80 = ($storeConfig['lebar_kertas_default'] === '80mm');
                     } else {
                         await writeChar.writeValue(chunk);
                     }
+                    // Jeda 20ms untuk mencegah buffer overrun pada printer BLE
+                    await new Promise(r => setTimeout(r, 20));
                 }
 
                 alert("Struk berhasil dikirim ke Printer Thermal Bluetooth!");
             } catch (error) {
-                console.error(error);
-                if (error.name !== 'NotFoundError') { // jika bukan karena kasir cancel dialog
+                console.error("Bluetooth print error:", error);
+                // Abaikan jika kasir membatalkan dialog pemilihan Bluetooth
+                if (error.name !== 'NotFoundError' && !error.message.includes('User cancelled')) {
                     alert("Koneksi Bluetooth gagal (" + error.message + "). Gunakan tombol 'Print Standar' sebagai alternatif.");
                 }
             } finally {
+                // Disconnect setelah selesai agar koneksi tidak menggantung
+                setTimeout(() => {
+                    try {
+                        if (device && device.gatt && device.gatt.connected) {
+                            device.gatt.disconnect();
+                        }
+                    } catch (e) {}
+                }, 1000);
+
                 btn.innerHTML = originalText;
                 btn.disabled = false;
             }
