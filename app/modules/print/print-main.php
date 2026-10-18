@@ -145,10 +145,16 @@ $isDefault80 = ($storeConfig['lebar_kertas_default'] === '80mm');
                     <i class="fa-solid fa-scroll text-xs"></i> <span id="label-width">58mm</span>
                 </button>
 
-                <!-- Web Bluetooth Print Button (Instant ESC/POS) -->
-                <button type="button" onclick="printThermalBluetooth()" id="btn-bt-print" class="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all shadow-md shadow-blue-600/30 flex items-center gap-1.5 active:scale-95">
-                    <i class="fa-brands fa-bluetooth-b text-sm"></i> Cetak Bluetooth
-                </button>
+                <!-- Web Bluetooth Print Button (Instant ESC/POS Auto Connect) -->
+                <div class="inline-flex rounded-xl shadow-md shadow-blue-600/30 overflow-hidden">
+                    <button type="button" onclick="printThermalBluetooth(false)" id="btn-bt-print" class="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all flex items-center gap-1.5 active:scale-95" title="Cetak langsung ke printer Bluetooth tersimpan">
+                        <i class="fa-brands fa-bluetooth-b text-sm"></i>
+                        <span id="btn-bt-text">Cetak Bluetooth</span>
+                    </button>
+                    <button type="button" onclick="printThermalBluetooth(true)" id="btn-bt-change" title="Ganti / Pasangkan Printer Bluetooth Baru" class="px-2.5 py-2 bg-blue-700 hover:bg-blue-800 text-blue-100 hover:text-white text-xs border-l border-blue-500/50 transition-colors flex items-center">
+                        <i class="fa-solid fa-arrows-rotate text-[11px]"></i>
+                    </button>
+                </div>
 
                 <!-- Browser Print Dialog Button -->
                 <button type="button" onclick="window.print()" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-md shadow-emerald-600/30 flex items-center gap-1.5 active:scale-95">
@@ -387,8 +393,24 @@ $isDefault80 = ($storeConfig['lebar_kertas_default'] === '80mm');
             return merged;
         }
 
-        // Web Bluetooth Print Function
-        async function printThermalBluetooth() {
+        // Inisialisasi status tombol Bluetooth dengan nama printer tersimpan
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedName = localStorage.getItem('hkpos_bt_device_name');
+            if (savedName) {
+                const txt = document.getElementById('btn-bt-text');
+                if (txt) {
+                    const shortName = savedName.length > 14 ? savedName.substring(0, 12) + '..' : savedName;
+                    txt.innerText = 'Cetak: ' + shortName;
+                }
+                const btnChange = document.getElementById('btn-bt-change');
+                if (btnChange) {
+                    btnChange.title = 'Printer aktif: ' + savedName + '. Klik ikon ini untuk memilih printer lain.';
+                }
+            }
+        });
+
+        // Web Bluetooth Print Function dengan Fitur Auto-Reconnect
+        async function printThermalBluetooth(forceNewPairing = false) {
             if (!navigator.bluetooth) {
                 alert("Browser ini belum mendukung Web Bluetooth API. Silakan gunakan Google Chrome di Tablet Android atau PC yang memiliki koneksi Bluetooth, atau gunakan tombol 'Print Standar'.");
                 window.print();
@@ -401,6 +423,8 @@ $isDefault80 = ($storeConfig['lebar_kertas_default'] === '80mm');
             btn.disabled = true;
 
             let device = null;
+            let server = null;
+
             try {
                 // Daftar UUID service printer thermal BLE yang umum digunakan
                 const thermalPrinterServices = [
@@ -416,22 +440,66 @@ $isDefault80 = ($storeConfig['lebar_kertas_default'] === '80mm');
                     '0000fff0-0000-1000-8000-00805f9b34fb'  // FFF0 Custom Service
                 ];
 
-                // Request Bluetooth Device (Gunakan acceptAllDevices tanpa filters agar tidak terjadi error bentrok)
-                device = await navigator.bluetooth.requestDevice({
-                    acceptAllDevices: true,
-                    optionalServices: thermalPrinterServices
-                });
+                const savedDeviceId = localStorage.getItem('hkpos_bt_device_id');
 
-                if (!device.gatt) {
-                    throw new Error("Perangkat tidak mendukung koneksi Bluetooth GATT.");
+                // 1. Jika BUKAN ganti printer baru, periksa apakah perangkat sebelumnya sudah diizinkan oleh Chrome
+                if (!forceNewPairing && navigator.bluetooth.getDevices) {
+                    try {
+                        const permittedDevices = await navigator.bluetooth.getDevices();
+                        if (permittedDevices && permittedDevices.length > 0) {
+                            if (savedDeviceId) {
+                                device = permittedDevices.find(d => d.id === savedDeviceId);
+                            }
+                            if (!device && permittedDevices.length === 1) {
+                                device = permittedDevices[0];
+                            }
+                        }
+                    } catch (e) {
+                        console.warn("getDevices() scan warning:", e);
+                    }
                 }
 
-                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyambungkan Printer...';
-                const server = await device.gatt.connect();
+                // 2. Jika perangkat tersimpan ditemukan, coba koneksikan langsung (tanpa memunculkan popup dialog Chrome)
+                if (device && device.gatt) {
+                    try {
+                        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyambung ' + (device.name || 'Printer') + '...';
+                        server = await device.gatt.connect();
+                    } catch (connErr) {
+                        console.warn("Koneksi langsung gagal, membuka pemilih perangkat:", connErr);
+                        device = null;
+                        server = null;
+                    }
+                }
+
+                // 3. Jika belum terhubung (belum ada printer tersimpan, atau koneksi langsung gagal, atau kasir menekan tombol ganti printer):
+                if (!server) {
+                    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Pilih Printer...';
+                    device = await navigator.bluetooth.requestDevice({
+                        acceptAllDevices: true,
+                        optionalServices: thermalPrinterServices
+                    });
+
+                    if (!device.gatt) {
+                        throw new Error("Perangkat tidak mendukung koneksi Bluetooth GATT.");
+                    }
+
+                    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyambungkan Printer...';
+                    server = await device.gatt.connect();
+
+                    // Simpan info printer ke localStorage agar pada transaksi berikutnya langsung cetak otomatis
+                    localStorage.setItem('hkpos_bt_device_id', device.id);
+                    localStorage.setItem('hkpos_bt_device_name', device.name || 'Printer Bluetooth');
+
+                    const txt = document.getElementById('btn-bt-text');
+                    if (txt && device.name) {
+                        const shortName = device.name.length > 14 ? device.name.substring(0, 12) + '..' : device.name;
+                        txt.innerText = 'Cetak: ' + shortName;
+                    }
+                }
 
                 let writeChar = null;
 
-                // 1. Coba iterasi semua primary services yang diizinkan untuk mencari karakteristik writable
+                // 4. Cari karakteristik writable pada service printer
                 try {
                     const services = await server.getPrimaryServices();
                     for (const s of services) {
@@ -444,15 +512,12 @@ $isDefault80 = ($storeConfig['lebar_kertas_default'] === '80mm');
                                 }
                             }
                             if (writeChar) break;
-                        } catch (charErr) {
-                            // Abaikan dan coba service berikutnya
-                        }
+                        } catch (charErr) {}
                     }
                 } catch (servErr) {
-                    console.warn("getPrimaryServices multi-scan dilewati:", servErr);
+                    console.warn("getPrimaryServices scan warning:", servErr);
                 }
 
-                // 2. Jika belum ditemukan, lakukan pengecekan langsung ke UUID service printer umum satu per satu
                 if (!writeChar) {
                     for (const uuid of thermalPrinterServices) {
                         try {
@@ -465,9 +530,7 @@ $isDefault80 = ($storeConfig['lebar_kertas_default'] === '80mm');
                                 }
                             }
                             if (writeChar) break;
-                        } catch (e) {
-                            // Service ini tidak ada di printer tersebut, lanjutkan
-                        }
+                        } catch (e) {}
                     }
                 }
 
@@ -477,11 +540,10 @@ $isDefault80 = ($storeConfig['lebar_kertas_default'] === '80mm');
 
                 btn.innerHTML = '<i class="fa-solid fa-print fa-bounce"></i> Mencetak Struk...';
 
-                // Generate bytes ESC/POS
+                // 5. Generate data ESC/POS & kirim ke printer
                 const is80 = document.getElementById('receipt-paper').classList.contains('receipt-80mm');
                 const rawData = buildEscPosData(receiptData, is80);
 
-                // Kirim byte data per chunk dengan jeda kecil agar buffer printer tidak overflow
                 const chunkSize = 100;
                 for (let i = 0; i < rawData.length; i += chunkSize) {
                     const chunk = rawData.slice(i, i + chunkSize);
@@ -490,19 +552,16 @@ $isDefault80 = ($storeConfig['lebar_kertas_default'] === '80mm');
                     } else {
                         await writeChar.writeValue(chunk);
                     }
-                    // Jeda 20ms untuk mencegah buffer overrun pada printer BLE
                     await new Promise(r => setTimeout(r, 20));
                 }
 
-                alert("Struk berhasil dikirim ke Printer Thermal Bluetooth!");
+                alert("Struk berhasil dikirim ke Printer " + (device.name || 'Bluetooth') + "!");
             } catch (error) {
                 console.error("Bluetooth print error:", error);
-                // Abaikan jika kasir membatalkan dialog pemilihan Bluetooth
                 if (error.name !== 'NotFoundError' && !error.message.includes('User cancelled')) {
                     alert("Koneksi Bluetooth gagal (" + error.message + "). Gunakan tombol 'Print Standar' sebagai alternatif.");
                 }
             } finally {
-                // Disconnect setelah selesai agar koneksi tidak menggantung
                 setTimeout(() => {
                     try {
                         if (device && device.gatt && device.gatt.connected) {
