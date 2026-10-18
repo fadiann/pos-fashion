@@ -140,13 +140,24 @@ $isDefault80 = ($storeConfig['lebar_kertas_default'] === '80mm');
 
             <!-- Action Buttons -->
             <div class="flex items-center gap-2">
+                <!-- Auto Print Toggle -->
+                <label class="hidden md:flex items-center gap-1.5 cursor-pointer text-[10px] text-slate-400 hover:text-slate-200 select-none mr-1" title="Cetak otomatis saat halaman struk terbuka">
+                    <input type="checkbox" id="check-auto-print" onchange="toggleAutoPrintSetting(this)" class="rounded text-teal-600 bg-slate-800 border-slate-700 focus:ring-0">
+                    <span>Auto-Cetak</span>
+                </label>
+
                 <!-- Size Switcher -->
-                <button type="button" id="btn-toggle-width" onclick="togglePaperWidth()" class="px-3 py-2 rounded-xl bg-slate-800 text-slate-300 hover:text-white text-xs font-bold transition-colors">
+                <button type="button" id="btn-toggle-width" onclick="togglePaperWidth()" class="px-2.5 py-2 rounded-xl bg-slate-800 text-slate-300 hover:text-white text-xs font-bold transition-colors">
                     <i class="fa-solid fa-scroll text-xs"></i> <span id="label-width">58mm</span>
                 </button>
 
+                <!-- Tombol RawBT (Android: Langsung Cetak ke Printer Bluetooth yang Sudah Dipairing Tanpa Dialog) -->
+                <button type="button" onclick="printRawBT()" id="btn-rawbt-print" class="hidden px-3.5 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold transition-all shadow-md shadow-amber-600/30 flex items-center gap-1.5 active:scale-95" title="Cetak langsung ke printer Bluetooth yang sudah dipairing di Android (via RawBT)">
+                    <i class="fa-solid fa-bolt"></i> <span>Cetak Android (RawBT)</span>
+                </button>
+
                 <!-- Web Bluetooth Print Button (Instant ESC/POS Auto Connect) -->
-                <div class="inline-flex rounded-xl shadow-md shadow-blue-600/30 overflow-hidden">
+                <div class="inline-flex rounded-xl shadow-md shadow-blue-600/30 overflow-hidden" id="container-bt-print">
                     <button type="button" onclick="printThermalBluetooth(false)" id="btn-bt-print" class="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all flex items-center gap-1.5 active:scale-95" title="Cetak langsung ke printer Bluetooth tersimpan">
                         <i class="fa-brands fa-bluetooth-b text-sm"></i>
                         <span id="btn-bt-text">Cetak Bluetooth</span>
@@ -157,8 +168,13 @@ $isDefault80 = ($storeConfig['lebar_kertas_default'] === '80mm');
                 </div>
 
                 <!-- Browser Print Dialog Button -->
-                <button type="button" onclick="window.print()" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-md shadow-emerald-600/30 flex items-center gap-1.5 active:scale-95">
+                <button type="button" onclick="window.print()" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-md shadow-emerald-600/30 flex items-center gap-1.5 active:scale-95" title="Cetak melalui driver printer sistem Windows / OS">
                     <i class="fa-solid fa-print text-sm"></i> Print Standar
+                </button>
+
+                <!-- Help Button: Tips Cetak Otomatis Tanpa Dialog -->
+                <button type="button" onclick="openHelpModal()" class="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white text-xs flex items-center justify-center transition-colors" title="Bantuan: Cara Cetak Otomatis Tanpa Dialog Pemilih">
+                    <i class="fa-solid fa-circle-question"></i>
                 </button>
             </div>
         </div>
@@ -262,7 +278,77 @@ $isDefault80 = ($storeConfig['lebar_kertas_default'] === '80mm');
         <a href="index.php?main=transaksi&success" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md transition-all active:scale-95">
             <i class="fa-solid fa-circle-check"></i> Selesai & Kembali ke Kasir
         </a>
-    </footer>
+    <!-- MODAL PANDUAN CETAK OTOMATIS (NO POP-UP) -->
+    <div id="helpModal" class="fixed inset-0 z-50 hidden overflow-y-auto no-print" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-slate-950/75 backdrop-blur-sm" onclick="closeHelpModal()"></div>
+        <div class="flex min-h-screen items-center justify-center p-4">
+            <div class="relative w-full max-w-lg rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden text-slate-800 dark:text-slate-100 text-left">
+                <!-- Header -->
+                <div class="flex items-center justify-between px-5 py-3.5 border-b border-slate-100 dark:border-slate-800">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-lg bg-teal-50 dark:bg-teal-950/60 text-teal-600 flex items-center justify-center font-bold text-sm">
+                            <i class="fa-solid fa-bolt"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold leading-tight mb-0">Solusi Cetak Otomatis (Tanpa Pop-up)</h3>
+                            <p class="text-[11px] text-slate-500 mb-0">Untuk printer yang sudah di-pairing di Bluetooth perangkat</p>
+                        </div>
+                    </div>
+                    <button type="button" onclick="closeHelpModal()" class="w-8 h-8 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 flex items-center justify-center">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <!-- Body -->
+                <div class="p-5 space-y-4 text-xs">
+                    <!-- Opsi A: PC / Laptop Windows -->
+                    <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-1.5">
+                        <div class="flex items-center gap-1.5 font-bold text-slate-900 dark:text-white">
+                            <i class="fa-brands fa-windows text-blue-500"></i>
+                            <span>1. Jika Kasir di Laptop / PC Windows (Chrome Kiosk)</span>
+                        </div>
+                        <p class="text-slate-600 dark:text-slate-300 leading-relaxed text-[11px]">
+                            Karena printer Bluetooth sudah di-pairing di Windows, Anda bisa mencetak <strong>100% instan tanpa dialog preview Chrome</strong>:
+                        </p>
+                        <ol class="list-decimal pl-4 space-y-1 text-[11px] text-slate-600 dark:text-slate-300">
+                            <li>Jadikan printer Bluetooth thermal sebagai <strong>Default Printer</strong> di Windows (Control Panel > Devices & Printers).</li>
+                            <li>Buka shortcut Chrome dengan menambahkan parameter <code class="px-1 py-0.5 rounded bg-slate-200 dark:bg-slate-700 font-mono text-[10px]">--kiosk-printing</code> di target shortcut.</li>
+                            <li>Klik tombol <strong>Print Standar</strong> (atau centang <strong>Auto-Cetak</strong>). Struk akan langsung keluar dari printer seketika tanpa dialog!</li>
+                        </ol>
+                    </div>
+
+                    <!-- Opsi B: HP / Tablet Android -->
+                    <div class="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 space-y-1.5">
+                        <div class="flex items-center gap-1.5 font-bold text-amber-900 dark:text-amber-300">
+                            <i class="fa-brands fa-android text-emerald-500"></i>
+                            <span>2. Jika Kasir di HP / Tablet Android (RawBT Driver)</span>
+                        </div>
+                        <p class="text-slate-600 dark:text-slate-300 leading-relaxed text-[11px]">
+                            Gunakan aplikasi pendamping <strong>RawBT</strong> (standar kasir POS Android di Indonesia):
+                        </p>
+                        <ol class="list-decimal pl-4 space-y-1 text-[11px] text-slate-600 dark:text-slate-300">
+                            <li>Install aplikasi gratis <strong>RawBT Print Service</strong> dari Google Play Store.</li>
+                            <li>Buka RawBT, pilih koneksi <strong>Bluetooth</strong> dan pilih printer Anda yang sudah dipairing.</li>
+                            <li>Di halaman ini, gunakan tombol <strong class="text-amber-600">Cetak Android (RawBT)</strong>. Struk akan langsung terkirim tanpa dialog pairing Chrome!</li>
+                        </ol>
+                    </div>
+
+                    <!-- Keterangan Web Bluetooth -->
+                    <div class="text-[10.5px] text-slate-500 dark:text-slate-400">
+                        <i class="fa-solid fa-circle-info mr-1 text-teal-500"></i>
+                        <em>Web Bluetooth API murni di Google Chrome selalu menerapkan sandbox keamanan browser yang mengharuskan konfirmasi izin perangkat dari pengguna.</em>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="px-5 py-3 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-850/50 flex justify-end">
+                    <button type="button" onclick="closeHelpModal()" class="px-4 py-2 rounded-lg bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs transition-colors">
+                        Saya Mengerti
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- JAVASCRIPT: WEB BLUETOOTH THERMAL PRINTER (ESC/POS DIRECT PRINT) -->
     <script>
@@ -393,8 +479,42 @@ $isDefault80 = ($storeConfig['lebar_kertas_default'] === '80mm');
             return merged;
         }
 
-        // Inisialisasi status tombol Bluetooth dengan nama printer tersimpan
+        // Cetak Instan Langsung ke Printer Bluetooth Android via RawBT (Tanpa Dialog)
+        function printRawBT() {
+            const is80 = document.getElementById('receipt-paper').classList.contains('receipt-80mm');
+            const rawData = buildEscPosData(receiptData, is80);
+
+            let binary = '';
+            const bytes = new Uint8Array(rawData);
+            for (let i = 0; i < bytes.byteLength; i++) {
+                binary += String.fromCharCode(bytes[i]);
+            }
+            const base64 = window.btoa(binary);
+
+            // Panggil skema aplikasi RawBT
+            window.location.href = "rawbt:data:application/octet-stream;base64," + base64;
+        }
+
+        function toggleAutoPrintSetting(el) {
+            localStorage.setItem('hkpos_auto_print', el.checked ? '1' : '0');
+        }
+
+        function openHelpModal() {
+            document.getElementById('helpModal')?.classList.remove('hidden');
+        }
+
+        function closeHelpModal() {
+            document.getElementById('helpModal')?.classList.add('hidden');
+        }
+
+        // Inisialisasi status tombol Bluetooth dengan nama printer tersimpan & Auto-Print
         document.addEventListener('DOMContentLoaded', () => {
+            const isAndroid = /android/i.test(navigator.userAgent);
+            const btnRawBT = document.getElementById('btn-rawbt-print');
+            if (btnRawBT && isAndroid) {
+                btnRawBT.classList.remove('hidden');
+            }
+
             const savedName = localStorage.getItem('hkpos_bt_device_name');
             if (savedName) {
                 const txt = document.getElementById('btn-bt-text');
@@ -406,6 +526,24 @@ $isDefault80 = ($storeConfig['lebar_kertas_default'] === '80mm');
                 if (btnChange) {
                     btnChange.title = 'Printer aktif: ' + savedName + '. Klik ikon ini untuk memilih printer lain.';
                 }
+            }
+
+            // Inisialisasi status Auto-Print
+            const isAutoPrint = localStorage.getItem('hkpos_auto_print') === '1';
+            const autoCheckbox = document.getElementById('check-auto-print');
+            if (autoCheckbox) {
+                autoCheckbox.checked = isAutoPrint;
+            }
+
+            // Jika fitur Auto-Print aktif, jalankan cetak otomatis
+            if (isAutoPrint) {
+                setTimeout(() => {
+                    if (isAndroid) {
+                        printRawBT();
+                    } else {
+                        window.print();
+                    }
+                }, 700);
             }
         });
 
