@@ -138,7 +138,7 @@ foreach ($viewlistpesanan as $pItem) {
     </div>
 
     <!-- TAB 1: LAYAR KASIR POS (DUAL COLUMN) -->
-    <div id="tab-content-pos" class="flex-1 flex flex-col md:flex-row gap-3 overflow-hidden min-h-0">
+    <div id="tab-content-pos" class="flex-1 flex flex-col md:flex-row gap-3 overflow-hidden min-h-0 md:h-[calc(100vh-215px)] md:min-h-[500px]">
         
         <?php if (!$isTransactionActive): ?>
             <!-- JIKA BELUM ADA TRANSAKSI AKTIF: TAMPILKAN START PANEL (POSISI LEBIH NAIK / ELEVATED) -->
@@ -169,21 +169,21 @@ foreach ($viewlistpesanan as $pItem) {
         <?php else: ?>
 
             <!-- KOLOM KIRI (KATALOG & PENCARIAN SEPATU) -->
-            <div class="flex-1 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 flex flex-col overflow-hidden shadow-sm transition-colors">
+            <div class="flex-1 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 flex flex-col h-full overflow-hidden shadow-sm transition-colors min-h-0">
                 
                 <!-- Search Bar & Category Filter -->
-                <div class="p-3 md:p-4 border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 space-y-3 shrink-0">
+                <div class="p-3 border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 space-y-2.5 shrink-0">
                     <div class="relative">
-                        <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-base"></i>
-                        <input type="text" id="pos-search-input" onkeyup="filterProductCards()" placeholder="Ketik nama atau kode produk..." class="w-full pl-11 pr-4 py-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-sm font-semibold text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                        <input type="text" id="pos-search-input" onkeyup="filterProductCards()" placeholder="Ketik nama atau kode produk..." class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-sm font-semibold text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all">
                         <button type="button" onclick="clearSearch()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1">
                             <i class="fa-solid fa-circle-xmark text-sm"></i>
                         </button>
                     </div>
 
                     <!-- Category Pills -->
-                    <div class="flex items-center gap-2 overflow-x-auto pb-1" id="category-filter-pills">
-                        <button type="button" onclick="filterByCategory('all', this)" class="cat-pill active px-3.5 py-1.5 rounded-full text-xs font-bold bg-slate-900 dark:bg-emerald-600 text-white whitespace-nowrap transition-colors">
+                    <div class="flex items-center gap-1.5 overflow-x-auto pb-0.5" id="category-filter-pills">
+                        <button type="button" onclick="filterByCategory('all', this)" class="cat-pill active px-3 py-1 rounded-full text-xs font-bold bg-slate-900 dark:bg-emerald-600 text-white whitespace-nowrap transition-colors">
                             Semua Produk
                         </button>
                         <?php
@@ -197,7 +197,7 @@ foreach ($viewlistpesanan as $pItem) {
                         }
                         foreach ($kategoriList as $cat):
                         ?>
-                            <button type="button" onclick="filterByCategory('<?= htmlspecialchars($cat) ?>', this)" class="cat-pill px-3.5 py-1.5 rounded-full text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 whitespace-nowrap transition-colors">
+                            <button type="button" onclick="filterByCategory('<?= htmlspecialchars($cat) ?>', this)" class="cat-pill px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 whitespace-nowrap transition-colors">
                                 <?= $cat ?>
                             </button>
                         <?php endforeach; ?>
@@ -205,8 +205,8 @@ foreach ($viewlistpesanan as $pItem) {
                 </div>
 
                 <!-- Product Grid (Cards Touch-Friendly) -->
-                <div class="flex-1 overflow-y-auto p-3 md:p-4">
-                    <div id="product-grid-container" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                <div class="flex-1 overflow-y-auto p-3 md:p-3.5 min-h-0 max-h-[50vh] md:max-h-none">
+                    <div id="product-grid-container" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5">
                         <?php if (!empty($daftarBarang)): ?>
                             <?php foreach ($daftarBarang as $barang): ?>
                                 <div class="product-card bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 hover:border-emerald-500 dark:hover:border-emerald-500 rounded-xl p-3 flex flex-col justify-between cursor-pointer hover:shadow-md transition-all active:scale-[0.97]"
@@ -252,12 +252,12 @@ foreach ($viewlistpesanan as $pItem) {
             </div>
 
             <!-- KOLOM KANAN (KERANJANG BELANJA & RINGKASAN CHECKOUT) -->
-            <div class="w-full md:w-[380px] lg:w-[420px] bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 flex flex-col overflow-hidden shadow-sm shrink-0 transition-colors">
+            <div class="w-full md:w-[360px] lg:w-[400px] bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 flex flex-col h-full overflow-hidden shadow-sm shrink-0 transition-colors min-h-0 md:sticky md:top-2">
                 
                 <!-- Cart Header -->
-                <div class="p-3.5 border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex items-center justify-between shrink-0">
+                <div class="p-3 border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex items-center justify-between shrink-0">
                     <div class="flex items-center gap-2">
-                        <i class="fa-solid fa-basket-shopping text-emerald-600 dark:text-emerald-400"></i>
+                        <i class="fa-solid fa-basket-shopping text-emerald-600 dark:text-emerald-400 text-sm"></i>
                         <h3 class="text-sm font-bold text-slate-900 dark:text-white mb-0">Keranjang Kasir</h3>
                         <span class="bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 text-xs font-bold px-2 py-0.5 rounded-full border border-emerald-300 dark:border-emerald-700">
                             <?= $totalItemCount ?> item
@@ -269,13 +269,13 @@ foreach ($viewlistpesanan as $pItem) {
                 </div>
 
                 <!-- Cart Items List -->
-                <div class="flex-1 overflow-y-auto p-3 space-y-2.5">
+                <div class="flex-1 overflow-y-auto p-3 space-y-2 min-h-0 max-h-[35vh] md:max-h-none">
                     <?php if (!empty($viewlistpesanan)): ?>
                         <?php foreach ($viewlistpesanan as $item): ?>
-                            <div class="bg-slate-50/80 dark:bg-slate-800/60 border border-slate-200/90 dark:border-slate-700/80 rounded-xl p-3 flex items-center justify-between gap-3 hover:border-slate-300 dark:hover:border-slate-600 transition-colors">
+                            <div class="bg-slate-50/80 dark:bg-slate-800/60 border border-slate-200/90 dark:border-slate-700/80 rounded-xl p-2.5 flex items-center justify-between gap-2.5 hover:border-slate-300 dark:hover:border-slate-600 transition-colors">
                                 <div class="flex-1 min-w-0">
-                                    <div class="flex items-center gap-1.5 mb-1">
-                                        <span class="bg-slate-800 dark:bg-slate-700 text-white text-[11px] font-bold px-2 py-0.5 rounded-md">
+                                    <div class="flex items-center gap-1.5 mb-0.5">
+                                        <span class="bg-slate-800 dark:bg-slate-700 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
                                             Size <?= $item['size_nama'] ?>
                                         </span>
                                         <h5 class="text-xs font-bold text-slate-800 dark:text-slate-100 truncate mb-0"><?= $item['nama_barang'] ?></h5>
@@ -285,14 +285,14 @@ foreach ($viewlistpesanan as $pItem) {
                                     </div>
                                 </div>
                                 <div class="text-right shrink-0">
-                                    <p class="text-xs md:text-sm font-extrabold text-slate-900 dark:text-white mb-1">
+                                    <p class="text-xs md:text-sm font-extrabold text-slate-900 dark:text-white mb-0.5">
                                         <?= $Helpers->rupiah($item['subtotal']) ?>
                                     </p>
                                     <form action="" method="post" class="inline-block" onsubmit="return confirm('Hapus item ini dari keranjang?')">
                                         <input type="hidden" value="deletepesanan" name="action">
                                         <input type="hidden" value="<?= $item['unix_id'] ?>" name="unix_id">
                                         <input type="hidden" value="<?= $item['transaksi_id'] ?>" name="idTran">
-                                        <button type="submit" class="p-1 text-rose-500 hover:text-rose-700 dark:hover:text-rose-400 text-xs font-medium transition-colors" title="Hapus">
+                                        <button type="submit" class="p-0.5 text-rose-500 hover:text-rose-700 dark:hover:text-rose-400 text-[11px] font-medium transition-colors" title="Hapus">
                                             <i class="fa-solid fa-trash-can"></i> Hapus
                                         </button>
                                     </form>
@@ -300,39 +300,39 @@ foreach ($viewlistpesanan as $pItem) {
                             </div>
                         <?php endforeach; ?>
                     <?php else: ?>
-                        <div class="h-full flex flex-col items-center justify-center text-center p-8 text-slate-400">
-                            <i class="fa-solid fa-cart-arrow-down text-4xl mb-3 text-slate-300 dark:text-slate-600"></i>
-                            <p class="text-sm font-bold text-slate-600 dark:text-slate-300 mb-1">Keranjang Masih Kosong</p>
-                            <p class="text-xs text-slate-400 dark:text-slate-500">Pilih produk dari katalog di samping untuk menambahkan item.</p>
+                        <div class="h-full flex flex-col items-center justify-center text-center p-6 text-slate-400">
+                            <i class="fa-solid fa-cart-arrow-down text-3xl mb-2 text-slate-300 dark:text-slate-600"></i>
+                            <p class="text-xs font-bold text-slate-600 dark:text-slate-300 mb-0.5">Keranjang Masih Kosong</p>
+                            <p class="text-[11px] text-slate-400 dark:text-slate-500 mb-0">Pilih produk dari katalog di samping.</p>
                         </div>
                     <?php endif; ?>
                 </div>
 
-                <!-- Cart Footer & Checkout Button -->
-                <div class="p-3.5 border-t border-slate-200/80 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/80 space-y-3 shrink-0">
-                    <div class="space-y-1.5 text-xs text-slate-600 dark:text-slate-400">
+                <!-- Cart Footer & Checkout Button (LOCKED AT THE BOTTOM) -->
+                <div class="p-3 border-t border-slate-200/80 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/80 space-y-2 shrink-0 sticky bottom-0 z-10 shadow-[0_-4px_12px_rgba(0,0,0,0.03)]">
+                    <div class="space-y-1 text-xs text-slate-600 dark:text-slate-400">
                         <div class="flex justify-between font-medium">
                             <span>Total Item</span>
                             <span class="text-slate-800 dark:text-slate-200 font-bold"><?= $totalItemCount ?> Pcs</span>
                         </div>
-                        <div class="flex justify-between text-sm font-extrabold text-slate-900 dark:text-white pt-1.5 border-t border-slate-200 dark:border-slate-800">
+                        <div class="flex justify-between text-sm font-extrabold text-slate-900 dark:text-white pt-1 border-t border-slate-200 dark:border-slate-800">
                             <span>TOTAL TAGIHAN</span>
-                            <span class="text-lg text-emerald-600 dark:text-emerald-400 font-extrabold"><?= $Helpers->rupiah($totalBayarVal) ?></span>
+                            <span class="text-base md:text-lg text-emerald-600 dark:text-emerald-400 font-extrabold"><?= $Helpers->rupiah($totalBayarVal) ?></span>
                         </div>
                     </div>
 
                     <!-- Bayar Button -->
                     <?php if (!empty($viewlistpesanan) && $totalBayarVal > 0): ?>
-                        <button type="button" onclick="openCheckoutModal(<?= $totalBayarVal ?>)" class="w-full py-3.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-extrabold text-base transition-all shadow-lg shadow-emerald-600/30 flex items-center justify-between">
+                        <button type="button" onclick="openCheckoutModal(<?= $totalBayarVal ?>)" class="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-extrabold text-sm md:text-base transition-all shadow-md shadow-emerald-600/30 flex items-center justify-between cursor-pointer">
                             <span class="flex items-center gap-2">
-                                <i class="fa-solid fa-credit-card"></i> PROSES BAYAR
+                                <i class="fa-solid fa-credit-card text-sm"></i> PROSES BAYAR
                             </span>
-                            <span class="bg-emerald-700/60 px-3 py-1 rounded-lg text-sm">
+                            <span class="bg-emerald-700/60 px-2.5 py-0.5 rounded-lg text-xs md:text-sm font-black">
                                 <?= $Helpers->rupiah($totalBayarVal) ?>
                             </span>
                         </button>
                     <?php else: ?>
-                        <button type="button" disabled class="w-full py-3.5 px-4 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-600 font-bold text-sm cursor-not-allowed text-center">
+                        <button type="button" disabled class="w-full py-3 px-4 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-600 font-bold text-sm cursor-not-allowed text-center">
                             Keranjang Kosong
                         </button>
                     <?php endif; ?>
@@ -505,127 +505,123 @@ foreach ($viewlistpesanan as $pItem) {
 <!-- MODAL 2: CHECKOUT & PEMBAYARAN KASIR      -->
 <!-- ========================================== -->
 <div id="modal-checkout" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-3 md:p-4">
-    <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-xl overflow-hidden shadow-2xl border border-slate-100 dark:border-slate-800 flex flex-col max-h-[95vh] transition-colors">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl border border-slate-100 dark:border-slate-800 flex flex-col max-h-[92vh] transition-colors">
         
-        <!-- Modal Header -->
-        <div class="p-4 md:p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/50">
+        <!-- Modal Header (Compact) -->
+        <div class="px-4 py-2.5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/70 dark:bg-slate-900/50">
             <div>
-                <span class="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">CHECKOUT PEMBAYARAN</span>
-                <h3 class="text-base md:text-lg font-bold text-slate-900 dark:text-white mb-0">Transaksi <?= $kodeTransaksi ?></h3>
+                <span class="text-[10px] font-extrabold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">CHECKOUT PEMBAYARAN</span>
+                <h3 class="text-sm font-bold text-slate-800 dark:text-white mb-0 leading-tight">Transaksi <?= $kodeTransaksi ?></h3>
             </div>
-            <button type="button" onclick="closeCheckoutModal()" class="w-9 h-9 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition-colors">
-                <i class="fa-solid fa-xmark text-base"></i>
+            <button type="button" onclick="closeCheckoutModal()" class="w-7 h-7 rounded-lg bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition-colors">
+                <i class="fa-solid fa-xmark text-xs"></i>
             </button>
         </div>
 
-        <form action="print.php" method="post" id="form-checkout" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-4">
+        <form action="print.php" method="post" id="form-checkout" class="flex-1 overflow-y-auto p-3.5 space-y-2.5">
             <input type="hidden" name="idTran" value="<?= $kodeTransaksi ?>">
             <input type="hidden" name="status" value="0">
             <input type="hidden" name="total" id="co-input-total" value="<?= $totalBayarVal ?>">
             <input type="hidden" name="potongan" id="co-input-potongan" value="0">
             <input type="hidden" name="sisa_bayar" id="co-input-sisa" value="<?= $totalBayarVal ?>">
 
-            <!-- Big Display Tagihan & Rincian Diskon -->
-            <div class="bg-slate-900 dark:bg-slate-950 text-white rounded-2xl p-4 text-center border border-slate-800 transition-all">
+            <!-- Compact Display Tagihan & Rincian Diskon -->
+            <div class="bg-slate-900 dark:bg-slate-950 text-white rounded-xl p-3 text-center border border-slate-800 transition-all shadow-sm">
                 <!-- Breakdown Subtotal & Diskon (Tampil saat ada diskon) -->
-                <div id="co-breakdown-container" class="hidden mb-2.5 pb-2.5 border-b border-slate-800 space-y-1 text-xs">
-                    <div class="flex items-center justify-between text-slate-400">
-                        <span>Subtotal Tagihan:</span>
-                        <span id="co-display-subtotal" class="font-bold text-slate-200">Rp 0</span>
-                    </div>
-                    <div class="flex items-center justify-between text-rose-400">
-                        <span class="flex items-center gap-1"><i class="fa-solid fa-tag text-[10px]"></i> Potongan Diskon:</span>
-                        <span id="co-display-diskon-badge" class="font-extrabold">- Rp 0</span>
-                    </div>
+                <div id="co-breakdown-container" class="hidden mb-1.5 pb-1.5 border-b border-slate-800 flex items-center justify-between text-[11px]">
+                    <span class="text-slate-400">Subtotal: <strong id="co-display-subtotal" class="text-slate-200 font-semibold">Rp 0</strong></span>
+                    <span class="text-rose-400 font-bold flex items-center gap-1">
+                        <i class="fa-solid fa-tag text-[9px]"></i> Diskon: <span id="co-display-diskon-badge">- Rp 0</span>
+                    </span>
                 </div>
 
-                <span class="text-xs text-slate-400 font-bold uppercase tracking-wider block" id="co-label-total">Total Tagihan</span>
-                <h2 class="text-2xl md:text-3xl font-extrabold text-emerald-400 mb-0 leading-tight" id="co-display-total">
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5" id="co-label-total">Total Tagihan</span>
+                <h2 class="text-xl md:text-2xl font-black text-emerald-400 mb-0 leading-tight" id="co-display-total">
                     <?= $Helpers->rupiah($totalBayarVal) ?>
                 </h2>
             </div>
 
-            <!-- Input Diskon / Potongan Harga (Nominal Rupiah) -->
-            <div class="bg-slate-50 dark:bg-slate-800/50 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700/80 space-y-2.5">
+            <!-- Input Diskon / Potongan Harga (Nominal Rupiah) - Ringkas -->
+            <div class="bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700/80 space-y-1.5">
                 <div class="flex items-center justify-between">
-                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-1.5 mb-0">
-                        <i class="fa-solid fa-tags text-rose-500"></i> Diskon / Potongan Harga
+                    <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-1 mb-0">
+                        <i class="fa-solid fa-tags text-rose-500 text-xs"></i> Diskon / Potongan
                     </label>
-                    <span class="text-[11px] text-slate-400 font-medium">Bentuk Nominal Rupiah (Rp)</span>
+                    <span class="text-[10px] text-slate-400 font-medium">Nominal Rp</span>
                 </div>
                 
                 <div class="relative">
-                    <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">Rp</span>
-                    <input type="number" id="co-input-potongan-display" oninput="handleDiscountChange(this.value)" min="0" step="1000" class="w-full h-11 pl-11 pr-20 rounded-xl bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 font-extrabold text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 transition-all" placeholder="0">
-                    <button type="button" onclick="setPresetDiscount(0)" class="absolute right-2 top-1/2 -translate-y-1/2 px-2.5 py-1 text-[11px] font-bold text-slate-500 hover:text-rose-600 dark:text-slate-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg transition-colors">
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">Rp</span>
+                    <input type="number" id="co-input-potongan-display" oninput="handleDiscountChange(this.value)" min="0" step="1000" class="w-full h-9 pl-9 pr-14 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 font-bold text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500/20 transition-all" placeholder="0">
+                    <button type="button" onclick="setPresetDiscount(0)" class="absolute right-1.5 top-1/2 -translate-y-1/2 px-2 py-0.5 text-[10px] font-bold text-slate-500 hover:text-rose-600 dark:text-slate-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded transition-colors">
                         Reset
                     </button>
                 </div>
 
                 <!-- Shortcut Preset Diskon Nominal Cepat -->
-                <div class="flex items-center gap-1.5 flex-wrap">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mr-1">Preset:</span>
-                    <button type="button" onclick="setPresetDiscount(5000)" class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-rose-400 hover:text-rose-600 transition-colors shadow-sm active:scale-95">
-                        5.000
+                <div class="flex items-center gap-1 flex-wrap pt-0.5">
+                    <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider mr-0.5">Preset:</span>
+                    <button type="button" onclick="setPresetDiscount(5000)" class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-rose-400 hover:text-rose-600 transition-colors shadow-2xs active:scale-95">
+                        5rb
                     </button>
-                    <button type="button" onclick="setPresetDiscount(10000)" class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-rose-400 hover:text-rose-600 transition-colors shadow-sm active:scale-95">
-                        10.000
+                    <button type="button" onclick="setPresetDiscount(10000)" class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-rose-400 hover:text-rose-600 transition-colors shadow-2xs active:scale-95">
+                        10rb
                     </button>
-                    <button type="button" onclick="setPresetDiscount(20000)" class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-rose-400 hover:text-rose-600 transition-colors shadow-sm active:scale-95">
-                        20.000
+                    <button type="button" onclick="setPresetDiscount(20000)" class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-rose-400 hover:text-rose-600 transition-colors shadow-2xs active:scale-95">
+                        20rb
                     </button>
-                    <button type="button" onclick="setPresetDiscount(50000)" class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-rose-400 hover:text-rose-600 transition-colors shadow-sm active:scale-95">
-                        50.000
+                    <button type="button" onclick="setPresetDiscount(50000)" class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-rose-400 hover:text-rose-600 transition-colors shadow-2xs active:scale-95">
+                        50rb
                     </button>
                 </div>
             </div>
 
-            <!-- Pilihan Metode Pembayaran -->
+            <!-- Pilihan Metode Pembayaran - Ringkas -->
             <div>
-                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">Metode Pembayaran</label>
-                <div class="grid grid-cols-2 gap-3">
+                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Metode Pembayaran</label>
+                <div class="grid grid-cols-2 gap-2">
                     <label class="cursor-pointer">
                         <input type="radio" name="jenis_pembayaran" value="1" checked onchange="onPaymentMethodChange(1)" class="peer sr-only">
-                        <div class="py-3 px-3 text-center rounded-xl border border-slate-200 dark:border-slate-700 peer-checked:border-emerald-600 peer-checked:bg-emerald-50 dark:peer-checked:bg-emerald-950/60 peer-checked:text-emerald-800 dark:peer-checked:text-emerald-300 font-bold text-xs text-slate-700 dark:text-slate-300 transition-all flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-money-bill-wave text-base"></i>
+                        <div class="py-2 px-2 text-center rounded-lg border border-slate-200 dark:border-slate-700 peer-checked:border-emerald-600 peer-checked:bg-emerald-50 dark:peer-checked:bg-emerald-950/60 peer-checked:text-emerald-800 dark:peer-checked:text-emerald-300 font-bold text-xs text-slate-700 dark:text-slate-300 transition-all flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-money-bill-wave text-xs"></i>
                             <span>Tunai (Cash)</span>
                         </div>
                     </label>
                     <label class="cursor-pointer">
                         <input type="radio" name="jenis_pembayaran" value="2" onchange="onPaymentMethodChange(2)" class="peer sr-only">
-                        <div class="py-3 px-3 text-center rounded-xl border border-slate-200 dark:border-slate-700 peer-checked:border-emerald-600 peer-checked:bg-emerald-50 dark:peer-checked:bg-emerald-950/60 peer-checked:text-emerald-800 dark:peer-checked:text-emerald-300 font-bold text-xs text-slate-700 dark:text-slate-300 transition-all flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-qrcode text-base"></i>
-                            <span>Non Tunai (QRIS / Transfer)</span>
+                        <div class="py-2 px-2 text-center rounded-lg border border-slate-200 dark:border-slate-700 peer-checked:border-emerald-600 peer-checked:bg-emerald-50 dark:peer-checked:bg-emerald-950/60 peer-checked:text-emerald-800 dark:peer-checked:text-emerald-300 font-bold text-xs text-slate-700 dark:text-slate-300 transition-all flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-qrcode text-xs"></i>
+                            <span>Non Tunai</span>
                         </div>
                     </label>
                 </div>
             </div>
 
-            <!-- Quick Cash Buttons (Dinamis & Cerdas Berdasarkan Total Tagihan) -->
+            <!-- Quick Cash Buttons (Dinamis & Ringkas) -->
             <div>
-                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">Pilihan Uang Cepat (Tap)</label>
-                <div id="quick-cash-container" class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Pilihan Uang Cepat (Tap)</label>
+                <div id="quick-cash-container" class="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
                     <!-- Tombol pilihan uang cepat dirender otomatis via JavaScript -->
                 </div>
             </div>
 
-            <!-- Input Uang Diterima & Kembalian -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <!-- Input Uang Diterima & Kembalian (Ringkas & Proporsional) -->
+            <div class="grid grid-cols-2 gap-2">
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Uang Diterima (Rp)</label>
-                    <input type="number" name="cash" id="co-input-cash" oninput="calculateChange()" class="w-full h-12 px-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 font-extrabold text-lg text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500" placeholder="0" required>
+                    <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Uang Diterima (Rp)</label>
+                    <input type="number" name="cash" id="co-input-cash" oninput="calculateChange()" class="w-full h-10 px-3 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 font-extrabold text-sm md:text-base text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500" placeholder="0" required>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Kembalian</label>
-                    <div id="co-display-kembalian" class="h-12 px-4 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 font-extrabold text-lg text-slate-700 dark:text-slate-300 flex items-center">
+                    <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Kembalian</label>
+                    <div id="co-display-kembalian" class="h-10 px-3 rounded-lg bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 font-extrabold text-sm md:text-base text-slate-700 dark:text-slate-300 flex items-center truncate">
                         Rp 0
                     </div>
                 </div>
             </div>
 
-            <!-- Submit Checkout Button -->
-            <button type="submit" id="btn-finish-checkout" class="w-full py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-extrabold text-base transition-all shadow-xl shadow-emerald-600/30 flex items-center justify-center gap-2">
-                <i class="fa-solid fa-print"></i> SELESAIKAN & CETAK STRUK
+            <!-- Submit Checkout Button (Ringkas & Tegas) -->
+            <button type="submit" id="btn-finish-checkout" class="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-extrabold text-sm transition-all shadow-md shadow-emerald-600/30 flex items-center justify-center gap-2 cursor-pointer mt-1">
+                <i class="fa-solid fa-print text-xs"></i> SELESAIKAN & CETAK STRUK
             </button>
         </form>
 
@@ -972,8 +968,8 @@ foreach ($viewlistpesanan as $pItem) {
             btn.type = 'button';
             btn.onclick = () => setCashAmount(opt.amount);
             btn.className = opt.isExact 
-                ? 'py-2.5 px-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300 font-bold text-xs border border-emerald-300 dark:border-emerald-700 active:scale-95 transition-all text-center'
-                : 'py-2.5 px-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs border border-slate-200 dark:border-slate-700 active:scale-95 transition-all text-center';
+                ? 'py-1.5 px-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300 font-bold text-xs border border-emerald-300 dark:border-emerald-700 active:scale-95 transition-all text-center truncate'
+                : 'py-1.5 px-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs border border-slate-200 dark:border-slate-700 active:scale-95 transition-all text-center truncate';
             btn.innerText = opt.label;
             container.appendChild(btn);
         });
@@ -1004,15 +1000,15 @@ foreach ($viewlistpesanan as $pItem) {
         const submitBtn = document.getElementById('btn-finish-checkout');
 
         if (kembalian >= 0) {
-            dispKembalian.className = 'h-12 px-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 font-extrabold text-lg text-emerald-700 dark:text-emerald-300 flex items-center';
+            dispKembalian.className = 'h-10 px-3 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 font-extrabold text-sm md:text-base text-emerald-700 dark:text-emerald-300 flex items-center truncate';
             dispKembalian.innerText = formatRupiah(kembalian);
             submitBtn.disabled = false;
-            submitBtn.className = 'w-full py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-extrabold text-base transition-all shadow-xl shadow-emerald-600/30 flex items-center justify-center gap-2 cursor-pointer';
+            submitBtn.className = 'w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-extrabold text-sm transition-all shadow-md shadow-emerald-600/30 flex items-center justify-center gap-2 cursor-pointer mt-1';
         } else {
-            dispKembalian.className = 'h-12 px-4 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 font-extrabold text-lg text-rose-600 dark:text-rose-400 flex items-center';
+            dispKembalian.className = 'h-10 px-3 rounded-lg bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 font-extrabold text-sm md:text-base text-rose-600 dark:text-rose-400 flex items-center truncate';
             dispKembalian.innerText = 'Kurang: ' + formatRupiah(Math.abs(kembalian));
             submitBtn.disabled = true;
-            submitBtn.className = 'w-full py-4 rounded-2xl bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-600 font-extrabold text-base transition-all flex items-center justify-center gap-2 cursor-not-allowed';
+            submitBtn.className = 'w-full py-2.5 px-4 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-600 font-extrabold text-sm transition-all flex items-center justify-center gap-2 cursor-not-allowed mt-1';
         }
     }
 
