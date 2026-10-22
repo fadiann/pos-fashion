@@ -535,15 +535,17 @@ $username  = $_SESSION['username'] ?? 'Kasir';
         <div id="sidebar-backdrop" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 hidden md:hidden"></div>
 
         <!-- MAIN CONTENT AREA -->
-        <main class="flex-1 overflow-y-auto bg-slate-100 dark:bg-slate-950 p-2.5 md:p-4 flex flex-col transition-colors duration-200">
-            <div class="max-w-[1600px] w-full mx-auto flex-1 flex flex-col justify-between">
-                <div>
+        <main class="flex-1 <?php echo ($main == 'transaksi') ? 'overflow-hidden p-2 md:p-3' : 'overflow-y-auto p-2.5 md:p-4'; ?> bg-slate-100 dark:bg-slate-950 flex flex-col transition-colors duration-200">
+            <div class="max-w-[1600px] w-full mx-auto flex-1 flex flex-col <?php echo ($main == 'transaksi') ? 'h-full min-h-0' : 'justify-between'; ?>">
+                <div class="<?php echo ($main == 'transaksi') ? 'flex-1 flex flex-col h-full min-h-0 overflow-hidden' : ''; ?>">
                     <?= $content ?? '' ?>
                 </div>
+                <?php if ($main !== 'transaksi'): ?>
                 <!-- FOOTER PATEN -->
                 <footer class="mt-8 pt-4 pb-2 border-t border-slate-200/60 dark:border-slate-800/60 text-center text-xs text-slate-400 dark:text-slate-500 select-none">
                     <p class="mb-0">&copy; 2026 Hekya. All rights reserved.</p>
                 </footer>
+                <?php endif; ?>
             </div>
         </main>
     </div>

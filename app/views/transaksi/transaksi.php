@@ -22,7 +22,7 @@ foreach ($viewlistpesanan as $pItem) {
 }
 ?>
 
-<div class="flex-1 flex flex-col h-full space-y-3">
+<div class="flex-1 flex flex-col h-full min-h-0 overflow-hidden space-y-2">
 
     <!-- SUBHEADER / QUICK STATS & CONTROLS (COMPACT) -->
     <div class="bg-white dark:bg-slate-900 rounded-xl p-2.5 md:p-3 border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-wrap items-center justify-between gap-2.5 shrink-0 transition-colors">
@@ -72,12 +72,12 @@ foreach ($viewlistpesanan as $pItem) {
                 <span class="text-[10px] text-slate-400 font-medium">(<?= date('d M Y') ?>)</span>
             </div>
             <button type="button" onclick="toggleDailySummary()" id="toggleSummaryBtn" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 text-xs flex items-center gap-1.5 transition-colors">
-                <span id="summaryToggleLabel" class="text-[10px] font-semibold">Sembunyikan</span>
-                <i id="summaryToggleIcon" class="fa-solid fa-chevron-up text-[10px] transition-transform"></i>
+                <span id="summaryToggleLabel" class="text-[10px] font-semibold">Tampilkan</span>
+                <i id="summaryToggleIcon" class="fa-solid fa-chevron-down text-[10px] transition-transform"></i>
             </button>
         </div>
 
-        <div id="summaryCardsContainer" class="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
+        <div id="summaryCardsContainer" class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 hidden">
             <!-- 1. Omset Penjualan Lunas -->
             <div class="p-2.5 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/40 border border-emerald-200/70 dark:border-emerald-800/60 flex items-center gap-3">
                 <div class="w-9 h-9 rounded-lg bg-emerald-500 text-white flex items-center justify-center text-sm shadow-sm shrink-0">
@@ -138,7 +138,7 @@ foreach ($viewlistpesanan as $pItem) {
     </div>
 
     <!-- TAB 1: LAYAR KASIR POS (DUAL COLUMN) -->
-    <div id="tab-content-pos" class="flex-1 flex flex-col md:flex-row gap-3 overflow-hidden min-h-0 md:h-[calc(100vh-215px)] md:min-h-[500px]">
+    <div id="tab-content-pos" class="flex-1 flex flex-col md:flex-row gap-2.5 overflow-hidden min-h-0 h-full">
         
         <?php if (!$isTransactionActive): ?>
             <!-- JIKA BELUM ADA TRANSAKSI AKTIF: TAMPILKAN START PANEL (POSISI LEBIH NAIK / ELEVATED) -->
@@ -169,7 +169,7 @@ foreach ($viewlistpesanan as $pItem) {
         <?php else: ?>
 
             <!-- KOLOM KIRI (KATALOG & PENCARIAN SEPATU) -->
-            <div class="flex-1 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 flex flex-col h-full overflow-hidden shadow-sm transition-colors min-h-0">
+            <div class="flex-1 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 flex flex-col h-[52vh] md:h-full overflow-hidden shadow-sm transition-colors min-h-0">
                 
                 <!-- Search Bar & Category Filter -->
                 <div class="p-3 border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 space-y-2.5 shrink-0">
@@ -205,7 +205,7 @@ foreach ($viewlistpesanan as $pItem) {
                 </div>
 
                 <!-- Product Grid (Cards Touch-Friendly) -->
-                <div class="flex-1 overflow-y-auto p-3 md:p-3.5 min-h-0 max-h-[50vh] md:max-h-none">
+                <div class="flex-1 overflow-y-auto p-2.5 md:p-3 min-h-0">
                     <div id="product-grid-container" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5">
                         <?php if (!empty($daftarBarang)): ?>
                             <?php foreach ($daftarBarang as $barang): ?>
@@ -252,7 +252,7 @@ foreach ($viewlistpesanan as $pItem) {
             </div>
 
             <!-- KOLOM KANAN (KERANJANG BELANJA & RINGKASAN CHECKOUT) -->
-            <div class="w-full md:w-[360px] lg:w-[400px] bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 flex flex-col h-full overflow-hidden shadow-sm shrink-0 transition-colors min-h-0 md:sticky md:top-2">
+            <div class="w-full md:w-[350px] lg:w-[380px] xl:w-[410px] bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 flex flex-col h-[46vh] md:h-full overflow-hidden shadow-sm shrink-0 transition-colors min-h-0">
                 
                 <!-- Cart Header -->
                 <div class="p-3 border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex items-center justify-between shrink-0">
@@ -269,7 +269,7 @@ foreach ($viewlistpesanan as $pItem) {
                 </div>
 
                 <!-- Cart Items List -->
-                <div class="flex-1 overflow-y-auto p-3 space-y-2 min-h-0 max-h-[35vh] md:max-h-none">
+                <div class="flex-1 overflow-y-auto p-2.5 space-y-2 min-h-0">
                     <?php if (!empty($viewlistpesanan)): ?>
                         <?php foreach ($viewlistpesanan as $item): ?>
                             <div class="bg-slate-50/80 dark:bg-slate-800/60 border border-slate-200/90 dark:border-slate-700/80 rounded-xl p-2.5 flex items-center justify-between gap-2.5 hover:border-slate-300 dark:hover:border-slate-600 transition-colors">
@@ -309,7 +309,7 @@ foreach ($viewlistpesanan as $pItem) {
                 </div>
 
                 <!-- Cart Footer & Checkout Button (LOCKED AT THE BOTTOM) -->
-                <div class="p-3 border-t border-slate-200/80 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/80 space-y-2 shrink-0 sticky bottom-0 z-10 shadow-[0_-4px_12px_rgba(0,0,0,0.03)]">
+                <div class="p-2.5 md:p-3 border-t border-slate-200/80 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/80 space-y-2 shrink-0 mt-auto shadow-[0_-4px_12px_rgba(0,0,0,0.03)]">
                     <div class="space-y-1 text-xs text-slate-600 dark:text-slate-400">
                         <div class="flex justify-between font-medium">
                             <span>Total Item</span>
@@ -339,6 +339,20 @@ foreach ($viewlistpesanan as $pItem) {
                 </div>
 
             </div>
+
+            <!-- FLOATING MOBILE QUICK CHECKOUT BAR (Khusus Smartphone: Langsung Bayar Tanpa Perlu Scroll) -->
+            <?php if (!empty($viewlistpesanan) && $totalBayarVal > 0): ?>
+                <div class="md:hidden fixed bottom-3 left-3 right-3 z-30 bg-slate-900/95 text-white p-2.5 rounded-2xl shadow-2xl border border-slate-700 flex items-center justify-between gap-3 backdrop-blur-md">
+                    <div class="min-w-0">
+                        <span class="text-[10px] text-slate-400 block font-semibold leading-tight"><?= $totalItemCount ?> Item di Keranjang</span>
+                        <span class="text-sm font-black text-emerald-400 leading-tight"><?= $Helpers->rupiah($totalBayarVal) ?></span>
+                    </div>
+                    <button type="button" onclick="openCheckoutModal(<?= $totalBayarVal ?>)" class="py-2 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white text-xs font-black shadow-md flex items-center gap-1.5 shrink-0">
+                        <i class="fa-solid fa-credit-card text-xs"></i>
+                        <span>PROSES BAYAR</span>
+                    </button>
+                </div>
+            <?php endif; ?>
 
         <?php endif; ?>
 
@@ -1077,15 +1091,16 @@ foreach ($viewlistpesanan as $pItem) {
         }
     }
 
-    // Restore state on page load
+    // Restore state on page load (Default: ringkasan tertutup agar ruang POS maksimal)
     document.addEventListener('DOMContentLoaded', () => {
-        if (localStorage.getItem('kasir_summary_collapsed') === '1') {
+        const savedState = localStorage.getItem('kasir_summary_collapsed');
+        if (savedState === '0') {
             const container = document.getElementById('summaryCardsContainer');
             const label = document.getElementById('summaryToggleLabel');
             const icon = document.getElementById('summaryToggleIcon');
-            if (container) container.classList.add('hidden');
-            if (label) label.innerText = 'Tampilkan';
-            if (icon) icon.className = 'fa-solid fa-chevron-down text-[10px] transition-transform';
+            if (container) container.classList.remove('hidden');
+            if (label) label.innerText = 'Sembunyikan';
+            if (icon) icon.className = 'fa-solid fa-chevron-up text-[10px] transition-transform';
         }
     });
 </script>
