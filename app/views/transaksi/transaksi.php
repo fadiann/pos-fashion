@@ -552,7 +552,7 @@ foreach ($viewlistpesanan as $pItem) {
                 
                 <div class="relative">
                     <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">Rp</span>
-                    <input type="number" id="co-input-potongan-display" oninput="handleDiscountChange(this.value)" min="0" step="1000" class="w-full h-9 pl-9 pr-14 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 font-bold text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500/20 transition-all" placeholder="0">
+                    <input type="text" inputmode="numeric" id="co-input-potongan-display" oninput="handleDiscountInput(this.value)" class="w-full h-9 pl-9 pr-14 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 font-bold text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500/20 transition-all" placeholder="0">
                     <button type="button" onclick="setPresetDiscount(0)" class="absolute right-1.5 top-1/2 -translate-y-1/2 px-2 py-0.5 text-[10px] font-bold text-slate-500 hover:text-rose-600 dark:text-slate-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded transition-colors">
                         Reset
                     </button>
@@ -561,17 +561,23 @@ foreach ($viewlistpesanan as $pItem) {
                 <!-- Shortcut Preset Diskon Nominal Cepat -->
                 <div class="flex items-center gap-1 flex-wrap pt-0.5">
                     <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider mr-0.5">Preset:</span>
+                    <button type="button" onclick="setPresetDiscount(1000)" class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-rose-400 hover:text-rose-600 transition-colors shadow-2xs active:scale-95">
+                        1.000
+                    </button>
                     <button type="button" onclick="setPresetDiscount(5000)" class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-rose-400 hover:text-rose-600 transition-colors shadow-2xs active:scale-95">
-                        5rb
+                        5.000
                     </button>
                     <button type="button" onclick="setPresetDiscount(10000)" class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-rose-400 hover:text-rose-600 transition-colors shadow-2xs active:scale-95">
-                        10rb
+                        10.000
                     </button>
                     <button type="button" onclick="setPresetDiscount(20000)" class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-rose-400 hover:text-rose-600 transition-colors shadow-2xs active:scale-95">
-                        20rb
+                        20.000
                     </button>
                     <button type="button" onclick="setPresetDiscount(50000)" class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-rose-400 hover:text-rose-600 transition-colors shadow-2xs active:scale-95">
-                        50rb
+                        50.000
+                    </button>
+                    <button type="button" onclick="setPresetDiscount(100000)" class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-rose-400 hover:text-rose-600 transition-colors shadow-2xs active:scale-95">
+                        100.000
                     </button>
                 </div>
             </div>
@@ -609,7 +615,8 @@ foreach ($viewlistpesanan as $pItem) {
             <div class="grid grid-cols-2 gap-2">
                 <div>
                     <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Uang Diterima (Rp)</label>
-                    <input type="number" name="cash" id="co-input-cash" oninput="calculateChange()" class="w-full h-10 px-3 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 font-extrabold text-sm md:text-base text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500" placeholder="0" required>
+                    <input type="hidden" name="cash" id="co-input-cash" value="0">
+                    <input type="text" inputmode="numeric" id="co-input-cash-display" oninput="handleCashInput(this.value)" class="w-full h-10 px-3 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 font-extrabold text-sm md:text-base text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500" placeholder="0" required>
                 </div>
                 <div>
                     <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Kembalian</label>
@@ -798,6 +805,25 @@ foreach ($viewlistpesanan as $pItem) {
     let totalBillAmount = 0;
     let currentDiscount = 0;
 
+    /**
+     * Parsing string berformat titik/angka menjadi integer
+     * Contoh: "100.000" -> 100000, "1.500" -> 1500
+     */
+    function parseNumberDot(val) {
+        if (!val) return 0;
+        const cleaned = String(val).replace(/[^\d]/g, '');
+        return cleaned !== '' ? parseInt(cleaned, 10) : 0;
+    }
+
+    /**
+     * Format angka dengan pemisah titik (.) untuk ribuan
+     * Contoh: 50000 -> "50.000", 125000 -> "125.000"
+     */
+    function formatNumberDot(num) {
+        const val = Math.round(Number(num) || 0);
+        return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+
     function openCheckoutModal(total) {
         totalBillAmount = total;
         currentDiscount = 0;
@@ -809,28 +835,35 @@ foreach ($viewlistpesanan as $pItem) {
         document.getElementById('modal-checkout').classList.remove('hidden');
     }
 
-    function handleDiscountChange(val) {
-        let disc = parseFloat(val) || 0;
+    function handleDiscountInput(val) {
+        let disc = parseNumberDot(val);
         if (disc < 0) disc = 0;
         if (disc > totalBillAmount) {
             disc = totalBillAmount;
-            const discInput = document.getElementById('co-input-potongan-display');
-            if (discInput) discInput.value = disc;
+        }
+        const discInput = document.getElementById('co-input-potongan-display');
+        if (discInput) {
+            discInput.value = disc > 0 ? formatNumberDot(disc) : '';
         }
         currentDiscount = disc;
         updateCheckoutCalculations(false);
     }
 
+    function handleDiscountChange(val) {
+        handleDiscountInput(val);
+    }
+
     function setPresetDiscount(nominal) {
-        nominal = parseFloat(nominal) || 0;
+        nominal = Math.round(Number(nominal) || 0);
         if (nominal > totalBillAmount) {
             nominal = totalBillAmount;
         }
         const discInput = document.getElementById('co-input-potongan-display');
         if (discInput) {
-            discInput.value = nominal > 0 ? nominal : '';
+            discInput.value = nominal > 0 ? formatNumberDot(nominal) : '';
         }
-        handleDiscountChange(nominal);
+        currentDiscount = nominal;
+        updateCheckoutCalculations(false);
     }
 
     function updateCheckoutCalculations(resetCash) {
@@ -864,10 +897,10 @@ foreach ($viewlistpesanan as $pItem) {
         renderQuickCashOptions(netTotal);
 
         if (resetCash || isNonTunaiSelected()) {
-            document.getElementById('co-input-cash').value = netTotal;
+            setCashAmount(netTotal);
+        } else {
+            calculateChange();
         }
-
-        calculateChange();
     }
 
     function isNonTunaiSelected() {
@@ -878,9 +911,10 @@ foreach ($viewlistpesanan as $pItem) {
     function onPaymentMethodChange(jenis) {
         const netTotal = Math.max(0, totalBillAmount - currentDiscount);
         if (jenis === 2) {
-            document.getElementById('co-input-cash').value = netTotal;
+            setCashAmount(netTotal);
+        } else {
+            calculateChange();
         }
-        calculateChange();
     }
 
     /**
@@ -975,20 +1009,27 @@ foreach ($viewlistpesanan as $pItem) {
         });
     }
 
-    /**
-     * Format angka dengan pemisah titik (.) untuk ribuan
-     * Contoh: 50000 -> "50.000", 125000 -> "125.000"
-     */
-    function formatNumberDot(num) {
-        return Math.round(num).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-    }
-
     function closeCheckoutModal() {
         document.getElementById('modal-checkout').classList.add('hidden');
     }
 
+    function handleCashInput(val) {
+        const cash = parseNumberDot(val);
+        const cashDisplay = document.getElementById('co-input-cash-display');
+        if (cashDisplay) {
+            cashDisplay.value = cash > 0 ? formatNumberDot(cash) : '';
+        }
+        document.getElementById('co-input-cash').value = cash;
+        calculateChange();
+    }
+
     function setCashAmount(nominal) {
-        document.getElementById('co-input-cash').value = nominal;
+        const num = Math.round(Number(nominal) || 0);
+        const cashDisplay = document.getElementById('co-input-cash-display');
+        if (cashDisplay) {
+            cashDisplay.value = num > 0 ? formatNumberDot(num) : '';
+        }
+        document.getElementById('co-input-cash').value = num;
         calculateChange();
     }
 

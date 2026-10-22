@@ -12,10 +12,16 @@ if(isset($_POST['idTran'])){
     $idTran     = preg_replace('/[^a-zA-Z0-9_\-]/', '', $_POST['idTran'] ?? '');
     $status     = preg_replace('/[^0-9]/', '', $_POST['status'] ?? '0');
 
-    $total_bayar      = (float)($_POST['total'] ?? 0);
-    $potongan_harga   = (float)($_POST['potongan'] ?? 0);
-    $sisa_bayar       = (float)($_POST['sisa_bayar'] ?? 0);
-    $cash             = (float)($_POST['cash'] ?? 0);
+    $clean_num = function($v) {
+        if (is_numeric($v)) return (float)$v;
+        $s = preg_replace('/[^\d]/', '', (string)$v);
+        return $s !== '' ? (float)$s : 0.0;
+    };
+
+    $total_bayar      = $clean_num($_POST['total'] ?? 0);
+    $potongan_harga   = $clean_num($_POST['potongan'] ?? 0);
+    $sisa_bayar       = $clean_num($_POST['sisa_bayar'] ?? 0);
+    $cash             = $clean_num($_POST['cash'] ?? 0);
     $jenis_pembayaran = (int)($_POST['jenis_pembayaran'] ?? 1);
 
     date_default_timezone_set('Asia/Jakarta');
