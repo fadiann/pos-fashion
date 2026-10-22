@@ -5,9 +5,9 @@ Dokumen ini dibaca secara otomatis oleh AI Assistant / Agent pada setiap awal se
 ---
 
 ## 1. Lingkungan & Server Hosting
-- **Production URL**: `https://bss.hekyacafe.com`
+- **Production URL**: `https://bakulsepatusolo.com` (sebelumnya `https://bss.hekyacafe.com`)
 - **Root Directory Local**: `C:\laragon\www\bakulsepatusolo`
-- **Remote Public HTML**: `/home/u130940415/domains/bss.hekyacafe.com/public_html`
+- **Remote Public HTML**: `/home/u130940415/domains/bakulsepatusolo.com/public_html`
 - **Database Engine**: MySQL / ADODB PHP (`u130940415_bss`)
 
 ---
