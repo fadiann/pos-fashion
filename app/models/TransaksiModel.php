@@ -238,7 +238,17 @@ class TransaksiModel{
         $resLunas = $this->db->query($sqlLunas);
         $rowLunas = $resLunas ? $resLunas->FetchRow() : null;
 
-        $omsetLunas = (float)($rowLunas['total_omset'] ?? 0);
+        // Ambil omset bersih dari total_pembayaran (setelah dikurangi diskon)
+        $sqlNet = "SELECT SUM(total_pembayaran) as net_omset, SUM(promo_nominal) as total_diskon 
+                   FROM tbl_transaksi 
+                   WHERE tanggal LIKE '%$today%' AND status = '0'";
+        $resNet = $this->db->query($sqlNet);
+        $rowNet = $resNet ? $resNet->FetchRow() : null;
+
+        $omsetLunas = ($rowNet && isset($rowNet['net_omset']) && $rowNet['net_omset'] !== null)
+                      ? (float)$rowNet['net_omset'] 
+                      : (float)($rowLunas['total_omset'] ?? 0);
+        $diskonLunas = (float)($rowNet['total_diskon'] ?? 0);
         $trxSelesai = (int)($rowLunas['total_transaksi_selesai'] ?? 0);
         $pcsTerjual = (int)($rowLunas['total_pcs_terjual'] ?? 0);
 
@@ -258,6 +268,7 @@ class TransaksiModel{
 
         return [
             'omset_lunas'   => $omsetLunas,
+            'diskon_lunas'  => $diskonLunas,
             'trx_selesai'   => $trxSelesai,
             'pcs_terjual'   => $pcsTerjual,
             'trx_pending'   => $trxPending,

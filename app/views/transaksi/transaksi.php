@@ -88,6 +88,11 @@ foreach ($viewlistpesanan as $pItem) {
                     <div class="text-xs md:text-sm font-extrabold text-slate-900 dark:text-white truncate">
                         <?= $Helpers->rp($ringkasanHarian['omset_lunas'] ?? 0) ?>
                     </div>
+                    <?php if (!empty($ringkasanHarian['diskon_lunas']) && $ringkasanHarian['diskon_lunas'] > 0): ?>
+                        <div class="text-[10px] font-semibold text-rose-600 dark:text-rose-400 truncate">
+                            Hemat: <?= $Helpers->rp($ringkasanHarian['diskon_lunas']) ?>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
 
@@ -363,9 +368,13 @@ foreach ($viewlistpesanan as $pItem) {
                     <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
                         <?php if (!empty($viewlist)): ?>
                             <?php $no = 1; foreach ($viewlist as $row): 
-                                $isLunas = ($row['status'] == '0');
-                                $tTotal  = $model->getTotal($row['transaksi_id']);
-                                $nominal = (float)($tTotal[0] ?? 0);
+                                $isLunas  = ($row['status'] == '0');
+                                $tTotal   = $model->getTotal($row['transaksi_id']);
+                                $nominal  = (float)($tTotal[0] ?? 0);
+                                if ($isLunas && isset($row['total_pembayaran']) && $row['total_pembayaran'] !== null && $row['total_pembayaran'] > 0) {
+                                    $nominal = (float)$row['total_pembayaran'];
+                                }
+                                $promoVal = (float)($row['promo_nominal'] ?? 0);
                             ?>
                                 <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors">
                                     <td class="py-3 px-3 text-slate-500 dark:text-slate-400 font-medium"><?= $no++ ?></td>
@@ -380,7 +389,14 @@ foreach ($viewlistpesanan as $pItem) {
                                         }
                                         ?>
                                     </td>
-                                    <td class="py-3 px-3 text-right font-extrabold text-slate-900 dark:text-white"><?= $Helpers->rupiah($nominal) ?></td>
+                                    <td class="py-3 px-3 text-right">
+                                        <div class="font-extrabold text-slate-900 dark:text-white"><?= $Helpers->rupiah($nominal) ?></div>
+                                        <?php if ($promoVal > 0): ?>
+                                            <div class="text-[10px] font-bold text-rose-500 dark:text-rose-400">
+                                                Diskon: -<?= $Helpers->rupiah($promoVal) ?>
+                                            </div>
+                                        <?php endif; ?>
+                                    </td>
                                     <td class="py-3 px-3 text-center">
                                         <?php if ($isLunas): ?>
                                             <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
@@ -509,12 +525,59 @@ foreach ($viewlistpesanan as $pItem) {
             <input type="hidden" name="potongan" id="co-input-potongan" value="0">
             <input type="hidden" name="sisa_bayar" id="co-input-sisa" value="<?= $totalBayarVal ?>">
 
-            <!-- Big Display Tagihan -->
-            <div class="bg-slate-900 dark:bg-slate-950 text-white rounded-2xl p-4 text-center border border-slate-800">
-                <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Total Tagihan</span>
-                <h2 class="text-2xl md:text-3xl font-extrabold text-emerald-400 mb-0" id="co-display-total">
+            <!-- Big Display Tagihan & Rincian Diskon -->
+            <div class="bg-slate-900 dark:bg-slate-950 text-white rounded-2xl p-4 text-center border border-slate-800 transition-all">
+                <!-- Breakdown Subtotal & Diskon (Tampil saat ada diskon) -->
+                <div id="co-breakdown-container" class="hidden mb-2.5 pb-2.5 border-b border-slate-800 space-y-1 text-xs">
+                    <div class="flex items-center justify-between text-slate-400">
+                        <span>Subtotal Tagihan:</span>
+                        <span id="co-display-subtotal" class="font-bold text-slate-200">Rp 0</span>
+                    </div>
+                    <div class="flex items-center justify-between text-rose-400">
+                        <span class="flex items-center gap-1"><i class="fa-solid fa-tag text-[10px]"></i> Potongan Diskon:</span>
+                        <span id="co-display-diskon-badge" class="font-extrabold">- Rp 0</span>
+                    </div>
+                </div>
+
+                <span class="text-xs text-slate-400 font-bold uppercase tracking-wider block" id="co-label-total">Total Tagihan</span>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-emerald-400 mb-0 leading-tight" id="co-display-total">
                     <?= $Helpers->rupiah($totalBayarVal) ?>
                 </h2>
+            </div>
+
+            <!-- Input Diskon / Potongan Harga (Nominal Rupiah) -->
+            <div class="bg-slate-50 dark:bg-slate-800/50 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700/80 space-y-2.5">
+                <div class="flex items-center justify-between">
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-1.5 mb-0">
+                        <i class="fa-solid fa-tags text-rose-500"></i> Diskon / Potongan Harga
+                    </label>
+                    <span class="text-[11px] text-slate-400 font-medium">Bentuk Nominal Rupiah (Rp)</span>
+                </div>
+                
+                <div class="relative">
+                    <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">Rp</span>
+                    <input type="number" id="co-input-potongan-display" oninput="handleDiscountChange(this.value)" min="0" step="1000" class="w-full h-11 pl-11 pr-20 rounded-xl bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 font-extrabold text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 transition-all" placeholder="0">
+                    <button type="button" onclick="setPresetDiscount(0)" class="absolute right-2 top-1/2 -translate-y-1/2 px-2.5 py-1 text-[11px] font-bold text-slate-500 hover:text-rose-600 dark:text-slate-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg transition-colors">
+                        Reset
+                    </button>
+                </div>
+
+                <!-- Shortcut Preset Diskon Nominal Cepat -->
+                <div class="flex items-center gap-1.5 flex-wrap">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mr-1">Preset:</span>
+                    <button type="button" onclick="setPresetDiscount(5000)" class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-rose-400 hover:text-rose-600 transition-colors shadow-sm active:scale-95">
+                        5.000
+                    </button>
+                    <button type="button" onclick="setPresetDiscount(10000)" class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-rose-400 hover:text-rose-600 transition-colors shadow-sm active:scale-95">
+                        10.000
+                    </button>
+                    <button type="button" onclick="setPresetDiscount(20000)" class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-rose-400 hover:text-rose-600 transition-colors shadow-sm active:scale-95">
+                        20.000
+                    </button>
+                    <button type="button" onclick="setPresetDiscount(50000)" class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-rose-400 hover:text-rose-600 transition-colors shadow-sm active:scale-95">
+                        50.000
+                    </button>
+                </div>
             </div>
 
             <!-- Pilihan Metode Pembayaran -->
@@ -522,14 +585,14 @@ foreach ($viewlistpesanan as $pItem) {
                 <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">Metode Pembayaran</label>
                 <div class="grid grid-cols-2 gap-3">
                     <label class="cursor-pointer">
-                        <input type="radio" name="jenis_pembayaran" value="1" checked class="peer sr-only">
+                        <input type="radio" name="jenis_pembayaran" value="1" checked onchange="onPaymentMethodChange(1)" class="peer sr-only">
                         <div class="py-3 px-3 text-center rounded-xl border border-slate-200 dark:border-slate-700 peer-checked:border-emerald-600 peer-checked:bg-emerald-50 dark:peer-checked:bg-emerald-950/60 peer-checked:text-emerald-800 dark:peer-checked:text-emerald-300 font-bold text-xs text-slate-700 dark:text-slate-300 transition-all flex items-center justify-center gap-2">
                             <i class="fa-solid fa-money-bill-wave text-base"></i>
                             <span>Tunai (Cash)</span>
                         </div>
                     </label>
                     <label class="cursor-pointer">
-                        <input type="radio" name="jenis_pembayaran" value="2" class="peer sr-only">
+                        <input type="radio" name="jenis_pembayaran" value="2" onchange="onPaymentMethodChange(2)" class="peer sr-only">
                         <div class="py-3 px-3 text-center rounded-xl border border-slate-200 dark:border-slate-700 peer-checked:border-emerald-600 peer-checked:bg-emerald-50 dark:peer-checked:bg-emerald-950/60 peer-checked:text-emerald-800 dark:peer-checked:text-emerald-300 font-bold text-xs text-slate-700 dark:text-slate-300 transition-all flex items-center justify-center gap-2">
                             <i class="fa-solid fa-qrcode text-base"></i>
                             <span>Non Tunai (QRIS / Transfer)</span>
@@ -737,18 +800,91 @@ foreach ($viewlistpesanan as $pItem) {
 
     // Checkout Modal Handling
     let totalBillAmount = 0;
+    let currentDiscount = 0;
+
     function openCheckoutModal(total) {
         totalBillAmount = total;
-        document.getElementById('co-input-total').value = total;
-        document.getElementById('co-input-sisa').value = total;
-        document.getElementById('co-display-total').innerText = formatRupiah(total);
-        document.getElementById('co-input-cash').value = total; // default uang pas
+        currentDiscount = 0;
         
-        // Render Pilihan Uang Cepat (Tap) yang Mendekati Tagihan & Format Titik
-        renderQuickCashOptions(total);
+        const discInput = document.getElementById('co-input-potongan-display');
+        if (discInput) discInput.value = '';
+
+        updateCheckoutCalculations(true);
+        document.getElementById('modal-checkout').classList.remove('hidden');
+    }
+
+    function handleDiscountChange(val) {
+        let disc = parseFloat(val) || 0;
+        if (disc < 0) disc = 0;
+        if (disc > totalBillAmount) {
+            disc = totalBillAmount;
+            const discInput = document.getElementById('co-input-potongan-display');
+            if (discInput) discInput.value = disc;
+        }
+        currentDiscount = disc;
+        updateCheckoutCalculations(false);
+    }
+
+    function setPresetDiscount(nominal) {
+        nominal = parseFloat(nominal) || 0;
+        if (nominal > totalBillAmount) {
+            nominal = totalBillAmount;
+        }
+        const discInput = document.getElementById('co-input-potongan-display');
+        if (discInput) {
+            discInput.value = nominal > 0 ? nominal : '';
+        }
+        handleDiscountChange(nominal);
+    }
+
+    function updateCheckoutCalculations(resetCash) {
+        const netTotal = Math.max(0, totalBillAmount - currentDiscount);
+        
+        document.getElementById('co-input-total').value = totalBillAmount;
+        document.getElementById('co-input-potongan').value = currentDiscount;
+        document.getElementById('co-input-sisa').value = netTotal;
+
+        const breakdownContainer = document.getElementById('co-breakdown-container');
+        const dispSubtotal = document.getElementById('co-display-subtotal');
+        const dispDiskonBadge = document.getElementById('co-display-diskon-badge');
+        const labelTotal = document.getElementById('co-label-total');
+        const dispTotal = document.getElementById('co-display-total');
+
+        if (currentDiscount > 0) {
+            if (breakdownContainer) breakdownContainer.classList.remove('hidden');
+            if (dispSubtotal) dispSubtotal.innerText = formatRupiah(totalBillAmount);
+            if (dispDiskonBadge) dispDiskonBadge.innerText = '- ' + formatRupiah(currentDiscount);
+            if (labelTotal) labelTotal.innerText = 'TOTAL SETELAH DISKON';
+        } else {
+            if (breakdownContainer) breakdownContainer.classList.add('hidden');
+            if (labelTotal) labelTotal.innerText = 'TOTAL TAGIHAN';
+        }
+
+        if (dispTotal) {
+            dispTotal.innerText = formatRupiah(netTotal);
+        }
+
+        // Render Pilihan Uang Cepat (Tap) yang Mendekati Net Tagihan
+        renderQuickCashOptions(netTotal);
+
+        if (resetCash || isNonTunaiSelected()) {
+            document.getElementById('co-input-cash').value = netTotal;
+        }
 
         calculateChange();
-        document.getElementById('modal-checkout').classList.remove('hidden');
+    }
+
+    function isNonTunaiSelected() {
+        const radio = document.querySelector('input[name="jenis_pembayaran"]:checked');
+        return radio && radio.value === '2';
+    }
+
+    function onPaymentMethodChange(jenis) {
+        const netTotal = Math.max(0, totalBillAmount - currentDiscount);
+        if (jenis === 2) {
+            document.getElementById('co-input-cash').value = netTotal;
+        }
+        calculateChange();
     }
 
     /**
@@ -769,61 +905,63 @@ foreach ($viewlistpesanan as $pItem) {
             isExact: true
         });
 
-        // 2. Pembulatan ke kelipatan 5.000 terdekat ke atas
-        const round5k = Math.ceil(total / 5000) * 5000;
-        if (round5k > total && !options.some(o => o.amount === round5k)) {
-            options.push({
-                label: formatNumberDot(round5k),
-                amount: round5k
-            });
-        }
-
-        // 3. Pembulatan ke kelipatan 10.000 terdekat ke atas
-        const round10k = Math.ceil(total / 10000) * 10000;
-        if (round10k > total && !options.some(o => o.amount === round10k)) {
-            options.push({
-                label: formatNumberDot(round10k),
-                amount: round10k
-            });
-        }
-
-        // 4. Pembulatan ke kelipatan 20.000 terdekat ke atas
-        const round20k = Math.ceil(total / 20000) * 20000;
-        if (round20k > total && !options.some(o => o.amount === round20k)) {
-            options.push({
-                label: formatNumberDot(round20k),
-                amount: round20k
-            });
-        }
-
-        // 5. Pembulatan ke kelipatan 50.000 terdekat ke atas
-        const round50k = Math.ceil(total / 50000) * 50000;
-        if (round50k > total && !options.some(o => o.amount === round50k)) {
-            options.push({
-                label: formatNumberDot(round50k),
-                amount: round50k
-            });
-        }
-
-        // 6. Pembulatan ke kelipatan 100.000 terdekat ke atas
-        const round100k = Math.ceil(total / 100000) * 100000;
-        if (round100k > total && !options.some(o => o.amount === round100k)) {
-            options.push({
-                label: formatNumberDot(round100k),
-                amount: round100k
-            });
-        }
-
-        // 7. Tambahkan opsi pecahan uang umum jika opsi masih kurang dari 4
-        const standardDenoms = [10000, 20000, 50000, 100000, 200000, 500000];
-        for (const denom of standardDenoms) {
-            if (denom > total && !options.some(o => o.amount === denom)) {
+        if (total > 0) {
+            // 2. Pembulatan ke kelipatan 5.000 terdekat ke atas
+            const round5k = Math.ceil(total / 5000) * 5000;
+            if (round5k > total && !options.some(o => o.amount === round5k)) {
                 options.push({
-                    label: formatNumberDot(denom),
-                    amount: denom
+                    label: formatNumberDot(round5k),
+                    amount: round5k
                 });
             }
-            if (options.length >= 4) break;
+
+            // 3. Pembulatan ke kelipatan 10.000 terdekat ke atas
+            const round10k = Math.ceil(total / 10000) * 10000;
+            if (round10k > total && !options.some(o => o.amount === round10k)) {
+                options.push({
+                    label: formatNumberDot(round10k),
+                    amount: round10k
+                });
+            }
+
+            // 4. Pembulatan ke kelipatan 20.000 terdekat ke atas
+            const round20k = Math.ceil(total / 20000) * 20000;
+            if (round20k > total && !options.some(o => o.amount === round20k)) {
+                options.push({
+                    label: formatNumberDot(round20k),
+                    amount: round20k
+                });
+            }
+
+            // 5. Pembulatan ke kelipatan 50.000 terdekat ke atas
+            const round50k = Math.ceil(total / 50000) * 50000;
+            if (round50k > total && !options.some(o => o.amount === round50k)) {
+                options.push({
+                    label: formatNumberDot(round50k),
+                    amount: round50k
+                });
+            }
+
+            // 6. Pembulatan ke kelipatan 100.000 terdekat ke atas
+            const round100k = Math.ceil(total / 100000) * 100000;
+            if (round100k > total && !options.some(o => o.amount === round100k)) {
+                options.push({
+                    label: formatNumberDot(round100k),
+                    amount: round100k
+                });
+            }
+
+            // 7. Tambahkan opsi pecahan uang umum jika opsi masih kurang dari 4
+            const standardDenoms = [10000, 20000, 50000, 100000, 200000, 500000];
+            for (const denom of standardDenoms) {
+                if (denom > total && !options.some(o => o.amount === denom)) {
+                    options.push({
+                        label: formatNumberDot(denom),
+                        amount: denom
+                    });
+                }
+                if (options.length >= 4) break;
+            }
         }
 
         // Batasi maksimal 4 tombol cepat terbaik
@@ -860,21 +998,21 @@ foreach ($viewlistpesanan as $pItem) {
 
     function calculateChange() {
         const cash = parseFloat(document.getElementById('co-input-cash').value) || 0;
-        const total = totalBillAmount;
-        const kembalian = cash - total;
+        const netTotal = Math.max(0, totalBillAmount - currentDiscount);
+        const kembalian = cash - netTotal;
         const dispKembalian = document.getElementById('co-display-kembalian');
         const submitBtn = document.getElementById('btn-finish-checkout');
 
         if (kembalian >= 0) {
-            dispKembalian.className = 'h-12 px-4 rounded-xl bg-emerald-50 border border-emerald-200 font-extrabold text-lg text-emerald-700 flex items-center';
+            dispKembalian.className = 'h-12 px-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 font-extrabold text-lg text-emerald-700 dark:text-emerald-300 flex items-center';
             dispKembalian.innerText = formatRupiah(kembalian);
             submitBtn.disabled = false;
             submitBtn.className = 'w-full py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-extrabold text-base transition-all shadow-xl shadow-emerald-600/30 flex items-center justify-center gap-2 cursor-pointer';
         } else {
-            dispKembalian.className = 'h-12 px-4 rounded-xl bg-rose-50 border border-rose-200 font-extrabold text-lg text-rose-600 flex items-center';
+            dispKembalian.className = 'h-12 px-4 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 font-extrabold text-lg text-rose-600 dark:text-rose-400 flex items-center';
             dispKembalian.innerText = 'Kurang: ' + formatRupiah(Math.abs(kembalian));
             submitBtn.disabled = true;
-            submitBtn.className = 'w-full py-4 rounded-2xl bg-slate-200 text-slate-400 font-extrabold text-base transition-all flex items-center justify-center gap-2 cursor-not-allowed';
+            submitBtn.className = 'w-full py-4 rounded-2xl bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-600 font-extrabold text-base transition-all flex items-center justify-center gap-2 cursor-not-allowed';
         }
     }
 
