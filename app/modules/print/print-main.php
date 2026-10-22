@@ -151,10 +151,6 @@ $isDefault80 = ($storeConfig['lebar_kertas_default'] === '80mm');
                     <i class="fa-solid fa-scroll text-xs"></i> <span id="label-width">58mm</span>
                 </button>
 
-                <!-- Tombol RawBT (Android: Langsung Cetak ke Printer Bluetooth yang Sudah Dipairing Tanpa Dialog) -->
-                <button type="button" onclick="printRawBT()" id="btn-rawbt-print" class="hidden px-3.5 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold transition-all shadow-md shadow-amber-600/30 flex items-center gap-1.5 active:scale-95" title="Cetak langsung ke printer Bluetooth yang sudah dipairing di Android (via RawBT)">
-                    <i class="fa-solid fa-bolt"></i> <span>Cetak Android (RawBT)</span>
-                </button>
 
                 <!-- Web Bluetooth Print Button (Instant ESC/POS Auto Connect) -->
                 <div class="inline-flex rounded-xl shadow-md shadow-blue-600/30 overflow-hidden" id="container-bt-print">
@@ -317,21 +313,6 @@ $isDefault80 = ($storeConfig['lebar_kertas_default'] === '80mm');
                         </ol>
                     </div>
 
-                    <!-- Opsi B: HP / Tablet Android -->
-                    <div class="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 space-y-1.5">
-                        <div class="flex items-center gap-1.5 font-bold text-amber-900 dark:text-amber-300">
-                            <i class="fa-brands fa-android text-emerald-500"></i>
-                            <span>2. Jika Kasir di HP / Tablet Android (RawBT Driver)</span>
-                        </div>
-                        <p class="text-slate-600 dark:text-slate-300 leading-relaxed text-[11px]">
-                            Gunakan aplikasi pendamping <strong>RawBT</strong> (standar kasir POS Android di Indonesia):
-                        </p>
-                        <ol class="list-decimal pl-4 space-y-1 text-[11px] text-slate-600 dark:text-slate-300">
-                            <li>Install aplikasi gratis <strong>RawBT Print Service</strong> dari Google Play Store.</li>
-                            <li>Buka RawBT, pilih koneksi <strong>Bluetooth</strong> dan pilih printer Anda yang sudah dipairing.</li>
-                            <li>Di halaman ini, gunakan tombol <strong class="text-amber-600">Cetak Android (RawBT)</strong>. Struk akan langsung terkirim tanpa dialog pairing Chrome!</li>
-                        </ol>
-                    </div>
 
                     <!-- Keterangan Web Bluetooth -->
                     <div class="text-[10.5px] text-slate-500 dark:text-slate-400">
@@ -479,21 +460,6 @@ $isDefault80 = ($storeConfig['lebar_kertas_default'] === '80mm');
             return merged;
         }
 
-        // Cetak Instan Langsung ke Printer Bluetooth Android via RawBT (Tanpa Dialog)
-        function printRawBT() {
-            const is80 = document.getElementById('receipt-paper').classList.contains('receipt-80mm');
-            const rawData = buildEscPosData(receiptData, is80);
-
-            let binary = '';
-            const bytes = new Uint8Array(rawData);
-            for (let i = 0; i < bytes.byteLength; i++) {
-                binary += String.fromCharCode(bytes[i]);
-            }
-            const base64 = window.btoa(binary);
-
-            // Panggil skema aplikasi RawBT
-            window.location.href = "rawbt:data:application/octet-stream;base64," + base64;
-        }
 
         function toggleAutoPrintSetting(el) {
             localStorage.setItem('hkpos_auto_print', el.checked ? '1' : '0');
@@ -509,12 +475,6 @@ $isDefault80 = ($storeConfig['lebar_kertas_default'] === '80mm');
 
         // Inisialisasi status tombol Bluetooth dengan nama printer tersimpan & Auto-Print
         document.addEventListener('DOMContentLoaded', () => {
-            const isAndroid = /android/i.test(navigator.userAgent);
-            const btnRawBT = document.getElementById('btn-rawbt-print');
-            if (btnRawBT && isAndroid) {
-                btnRawBT.classList.remove('hidden');
-            }
-
             const savedName = localStorage.getItem('hkpos_bt_device_name');
             if (savedName) {
                 const txt = document.getElementById('btn-bt-text');
@@ -538,11 +498,7 @@ $isDefault80 = ($storeConfig['lebar_kertas_default'] === '80mm');
             // Jika fitur Auto-Print aktif, jalankan cetak otomatis
             if (isAutoPrint) {
                 setTimeout(() => {
-                    if (isAndroid) {
-                        printRawBT();
-                    } else {
-                        window.print();
-                    }
+                    window.print();
                 }, 700);
             }
         });
