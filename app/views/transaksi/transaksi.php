@@ -137,6 +137,21 @@ foreach ($viewlistpesanan as $pItem) {
         </div>
     </div>
 
+    <!-- MOBILE VIEW SWITCHER (Khusus Layar Mobile: Beralih Antara Katalog & Keranjang) -->
+    <?php if ($isTransactionActive): ?>
+    <div class="md:hidden flex items-center p-1 bg-slate-200/90 dark:bg-slate-800 rounded-xl shrink-0">
+        <button type="button" onclick="switchMobilePosView('catalog')" id="btn-mobile-view-catalog" class="flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs">
+            <i class="fa-solid fa-box-open text-xs text-emerald-500"></i>
+            <span>Pilih Produk</span>
+        </button>
+        <button type="button" onclick="switchMobilePosView('cart')" id="btn-mobile-view-cart" class="flex-1 py-2 text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-1.5 text-slate-600 dark:text-slate-400">
+            <i class="fa-solid fa-basket-shopping text-xs"></i>
+            <span>Keranjang</span>
+            <span class="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300"><?= $totalItemCount ?></span>
+        </button>
+    </div>
+    <?php endif; ?>
+
     <!-- TAB 1: LAYAR KASIR POS (DUAL COLUMN) -->
     <div id="tab-content-pos" class="flex-1 flex flex-col md:flex-row gap-2.5 overflow-hidden min-h-0 h-full">
         
@@ -168,8 +183,8 @@ foreach ($viewlistpesanan as $pItem) {
             </div>
         <?php else: ?>
 
-            <!-- KOLOM KIRI (KATALOG & PENCARIAN SEPATU) -->
-            <div class="flex-1 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 flex flex-col h-[52vh] md:h-full overflow-hidden shadow-sm transition-colors min-h-0">
+            <!-- KOLOM KIRI (KATALOG & PENCARIAN SEPATU: FULL-HEIGHT & LEGA DI SEMUA LAYAR) -->
+            <div id="pos-column-catalog" class="flex-1 w-full md:w-auto h-full min-h-0 flex flex-col bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 overflow-hidden shadow-sm transition-colors">
                 
                 <!-- Search Bar & Category Filter -->
                 <div class="p-3 border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 space-y-2.5 shrink-0">
@@ -205,7 +220,7 @@ foreach ($viewlistpesanan as $pItem) {
                 </div>
 
                 <!-- Product Grid (Cards Touch-Friendly) -->
-                <div class="flex-1 overflow-y-auto p-2.5 md:p-3 min-h-0">
+                <div class="flex-1 overflow-y-auto p-2.5 md:p-3 min-h-0 pb-20 md:pb-3">
                     <div id="product-grid-container" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5">
                         <?php if (!empty($daftarBarang)): ?>
                             <?php foreach ($daftarBarang as $barang): ?>
@@ -252,10 +267,10 @@ foreach ($viewlistpesanan as $pItem) {
             </div>
 
             <!-- KOLOM KANAN (KERANJANG BELANJA & RINGKASAN CHECKOUT) -->
-            <div class="w-full md:w-[350px] lg:w-[380px] xl:w-[410px] bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 flex flex-col h-[46vh] md:h-full overflow-hidden shadow-sm shrink-0 transition-colors min-h-0">
+            <div id="pos-column-cart" class="w-full md:w-[350px] lg:w-[380px] xl:w-[410px] h-full min-h-0 hidden md:flex flex-col bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 overflow-hidden shadow-sm shrink-0 transition-colors">
                 
                 <!-- Cart Header -->
-                <div class="p-3 border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex items-center justify-between shrink-0">
+                <div class="p-2.5 md:p-3 border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex items-center justify-between shrink-0">
                     <div class="flex items-center gap-2">
                         <i class="fa-solid fa-basket-shopping text-emerald-600 dark:text-emerald-400 text-sm"></i>
                         <h3 class="text-sm font-bold text-slate-900 dark:text-white mb-0">Keranjang Kasir</h3>
@@ -263,9 +278,15 @@ foreach ($viewlistpesanan as $pItem) {
                             <?= $totalItemCount ?> item
                         </span>
                     </div>
-                    <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">
-                        <?= ucfirst($activePelangganNama) ?>
-                    </span>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                            <?= ucfirst($activePelangganNama) ?>
+                        </span>
+                        <!-- Tombol Beralih Kembali ke Katalog di Mobile -->
+                        <button type="button" onclick="switchMobilePosView('catalog')" class="md:hidden px-2 py-1 rounded-lg bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold text-xs flex items-center gap-1">
+                            <i class="fa-solid fa-arrow-left text-[10px]"></i> Produk
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Cart Items List -->
@@ -342,12 +363,14 @@ foreach ($viewlistpesanan as $pItem) {
 
             <!-- FLOATING MOBILE QUICK CHECKOUT BAR (Khusus Smartphone: Langsung Bayar Tanpa Perlu Scroll) -->
             <?php if (!empty($viewlistpesanan) && $totalBayarVal > 0): ?>
-                <div class="md:hidden fixed bottom-3 left-3 right-3 z-30 bg-slate-900/95 text-white p-2.5 rounded-2xl shadow-2xl border border-slate-700 flex items-center justify-between gap-3 backdrop-blur-md">
-                    <div class="min-w-0">
-                        <span class="text-[10px] text-slate-400 block font-semibold leading-tight"><?= $totalItemCount ?> Item di Keranjang</span>
+                <div id="mobile-floating-checkout-bar" class="md:hidden fixed bottom-3 left-3 right-3 z-30 bg-slate-900/95 text-white p-2.5 rounded-2xl shadow-2xl border border-slate-700 flex items-center justify-between gap-3 backdrop-blur-md">
+                    <div class="min-w-0 cursor-pointer" onclick="switchMobilePosView('cart')">
+                        <span class="text-[10px] text-slate-400 block font-semibold leading-tight flex items-center gap-1">
+                            <i class="fa-solid fa-basket-shopping text-emerald-400"></i> <?= $totalItemCount ?> Item &bull; <span class="underline text-emerald-300">Lihat Keranjang</span>
+                        </span>
                         <span class="text-sm font-black text-emerald-400 leading-tight"><?= $Helpers->rupiah($totalBayarVal) ?></span>
                     </div>
-                    <button type="button" onclick="openCheckoutModal(<?= $totalBayarVal ?>)" class="py-2 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white text-xs font-black shadow-md flex items-center gap-1.5 shrink-0">
+                    <button type="button" onclick="openCheckoutModal(<?= $totalBayarVal ?>)" class="py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white text-xs font-black shadow-md flex items-center gap-1.5 shrink-0">
                         <i class="fa-solid fa-credit-card text-xs"></i>
                         <span>PROSES BAYAR</span>
                     </button>
@@ -652,6 +675,49 @@ foreach ($viewlistpesanan as $pItem) {
 <!-- JAVASCRIPT LOGIC KASIR TOUCH & POS -->
 <script>
     let currentShoeId = '';
+
+    // Mobile View Switcher (Katalog Produk vs Keranjang Kasir)
+    function switchMobilePosView(view) {
+        const colCatalog = document.getElementById('pos-column-catalog');
+        const colCart = document.getElementById('pos-column-cart');
+        const btnCat = document.getElementById('btn-mobile-view-catalog');
+        const btnCart = document.getElementById('btn-mobile-view-cart');
+        const floatingBar = document.getElementById('mobile-floating-checkout-bar');
+
+        if (!colCatalog || !colCart) return;
+
+        if (view === 'cart') {
+            colCatalog.classList.add('hidden');
+            colCatalog.classList.remove('flex');
+            colCart.classList.remove('hidden');
+            colCart.classList.add('flex');
+
+            if (btnCat) {
+                btnCat.className = 'flex-1 py-2 text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-1.5 text-slate-600 dark:text-slate-400';
+            }
+            if (btnCart) {
+                btnCart.className = 'flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs';
+            }
+            if (floatingBar) {
+                floatingBar.classList.add('hidden');
+            }
+        } else {
+            colCatalog.classList.remove('hidden');
+            colCatalog.classList.add('flex');
+            colCart.classList.add('hidden');
+            colCart.classList.remove('flex');
+
+            if (btnCat) {
+                btnCat.className = 'flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs';
+            }
+            if (btnCart) {
+                btnCart.className = 'flex-1 py-2 text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-1.5 text-slate-600 dark:text-slate-400';
+            }
+            if (floatingBar) {
+                floatingBar.classList.remove('hidden');
+            }
+        }
+    }
     let currentShoeName = '';
     let currentShoePrice = 0;
     let selectedStock = 0;
